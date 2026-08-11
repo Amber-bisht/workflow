@@ -1,6 +1,19 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 
+const googleClientId =
+  process.env.GOOGLE_CLIENT_ID ||
+  process.env.AUTH_GOOGLE_ID ||
+  process.env.GOOGLE_ID ||
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  "";
+
+const googleClientSecret =
+  process.env.GOOGLE_CLIENT_SECRET ||
+  process.env.AUTH_GOOGLE_SECRET ||
+  process.env.GOOGLE_SECRET ||
+  "";
+
 export const authConfig: NextAuthConfig = {
   secret:
     process.env.AUTH_SECRET ||
@@ -8,8 +21,8 @@ export const authConfig: NextAuthConfig = {
     "nextflow-super-secret-key-32-chars-long-auth-token",
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
     }),
   ],
   pages: {

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { 
+import { useSession } from "next-auth/react";
+import {
   CheckCircle2,
   Menu,
   X,
@@ -20,6 +21,7 @@ import {
 import AuthModal from "@/components/AuthModal";
 
 export default function KreaExactLandingPage() {
+  const { data: session, status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
@@ -64,7 +66,7 @@ export default function KreaExactLandingPage() {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden selection:bg-white selection:text-black">
-      
+
       {/* Auth Modal Overlay */}
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
@@ -72,7 +74,7 @@ export default function KreaExactLandingPage() {
       <div className="fixed top-0 left-0 w-full z-40">
         <header className="relative w-full mx-auto px-4 sm:px-6 lg:px-12 py-4 border-b border-white/15 backdrop-blur-xl bg-black/70 transition-all duration-300">
           <div className="flex items-center justify-between w-full max-w-7xl mx-auto">
-            
+
             {/* App Name Brand Logo */}
             <Link href="/" aria-label="Return to home" className="flex items-center gap-3">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
@@ -88,20 +90,32 @@ export default function KreaExactLandingPage() {
 
             {/* Header Action Buttons */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="inline-flex items-center justify-center h-[36px] px-5 text-xs sm:text-sm font-semibold text-black bg-white rounded-full hover:bg-neutral-200 transition-all active:scale-95 text-nowrap cursor-pointer shadow-md"
-                style={{ fontWeight: 450 }}
-              >
-                Sign up for free
-              </button>
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="inline-flex items-center justify-center h-[36px] px-5 text-xs sm:text-sm font-semibold text-white bg-[#262626] rounded-full hover:bg-neutral-800 transition-all active:scale-95 text-nowrap cursor-pointer"
-                style={{ fontWeight: 450 }}
-              >
-                Log in
-              </button>
+              {status === "authenticated" ? (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center h-[36px] px-5 text-xs sm:text-sm font-semibold text-black bg-white rounded-full hover:bg-neutral-200 transition-all active:scale-95 text-nowrap cursor-pointer shadow-md"
+                  style={{ fontWeight: 450 }}
+                >
+                  View Dashboard
+                </Link>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="inline-flex items-center justify-center h-[36px] px-5 text-xs sm:text-sm font-semibold text-black bg-white rounded-full hover:bg-neutral-200 transition-all active:scale-95 text-nowrap cursor-pointer shadow-md"
+                    style={{ fontWeight: 450 }}
+                  >
+                    Sign up for free
+                  </button>
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="inline-flex items-center justify-center h-[36px] px-5 text-xs sm:text-sm font-semibold text-white bg-[#262626] rounded-full hover:bg-neutral-800 transition-all active:scale-95 text-nowrap cursor-pointer"
+                    style={{ fontWeight: 450 }}
+                  >
+                    Log in
+                  </button>
+                </>
+              )}
             </div>
 
           </div>
@@ -113,7 +127,7 @@ export default function KreaExactLandingPage() {
         <div className="relative h-[69px] z-10">
           <div className="absolute bg-black inset-0" />
         </div>
-        <section 
+        <section
           className="relative isolate mx-auto overflow-hidden text-center flex flex-col items-center justify-start pt-12 sm:pt-16 pb-28"
           style={{
             minHeight: "calc(100vh - 69px)",
@@ -130,12 +144,12 @@ export default function KreaExactLandingPage() {
           />
 
           {/* Gradients */}
-          <div 
-            className="absolute inset-0 pointer-events-none z-10" 
+          <div
+            className="absolute inset-0 pointer-events-none z-10"
             style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.5) 32%, rgba(0,0,0,0.28) 56%, rgba(0,0,0,0.6) 100%)" }}
           />
-          <div 
-            className="absolute inset-0 pointer-events-none z-10" 
+          <div
+            className="absolute inset-0 pointer-events-none z-10"
             style={{ background: "radial-gradient(ellipse 80% 45% at 50% 24%, rgba(18,54,86,0.42) 0%, rgba(0,0,0,0) 70%)" }}
           />
 
@@ -170,18 +184,21 @@ export default function KreaExactLandingPage() {
             </p>
 
             <div className="flex items-center justify-center gap-[12px] mt-[22px] flex-wrap">
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="inline-flex h-10 items-center justify-center rounded-full px-10 text-[15px] font-medium text-black bg-white no-underline transition-all duration-200 hover:bg-neutral-100 active:scale-[0.98] cursor-pointer"
-              >
-                Start for free
-              </button>
-              <Link
-                href="/dashboard"
-                className="inline-flex h-10 items-center justify-center rounded-full px-10 text-[15px] font-medium text-white no-underline border border-white/20 backdrop-blur-[6px] bg-white/10 transition-all duration-200 hover:bg-white/20 active:scale-[0.98]"
-              >
-                Launch App
-              </Link>
+              {status === "authenticated" ? (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex h-10 items-center justify-center rounded-full px-10 text-[15px] font-medium text-black bg-white no-underline transition-all duration-200 hover:bg-neutral-100 active:scale-[0.98] cursor-pointer"
+                >
+                  View Dashboard
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="inline-flex h-10 items-center justify-center rounded-full px-10 text-[15px] font-medium text-black bg-white no-underline transition-all duration-200 hover:bg-neutral-100 active:scale-[0.98] cursor-pointer"
+                >
+                  Start for free
+                </button>
+              )}
             </div>
           </div>
         </section>
@@ -269,7 +286,7 @@ export default function KreaExactLandingPage() {
 
       {/* ── Section 3: High-Impact Feature Banners ─────────────────────────────── */}
       <section className="py-24 bg-black text-white px-6 space-y-28 max-w-[1300px] mx-auto">
-        
+
         {/* Feature Banner 1: Visual Node Canvas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
@@ -406,7 +423,8 @@ export default function KreaExactLandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto pt-8 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
-          <div>© {new Date().getFullYear()} NextFlow by amberbisht. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} automation.amberbisht.me
+            All rights reserved.</div>
           <div className="flex gap-6">
             <span className="hover:text-neutral-400 cursor-pointer">Terms of Service</span>
             <span className="hover:text-neutral-400 cursor-pointer">Privacy Policy</span>

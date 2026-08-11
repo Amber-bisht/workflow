@@ -1,4 +1,11 @@
 import type { NextConfig } from "next";
+import dotenv from "dotenv";
+import path from "path";
+
+// Load root .env file into process.env during Node.js server startup
+dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), "../../.env.local") });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const nextConfig: NextConfig = {
   async rewrites() {
