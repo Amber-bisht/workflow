@@ -1,0 +1,28 @@
+{
+  "name": "@nextflow/backend",
+  "version": "0.1.0",
+  "module": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "build": "bun build ./src/index.ts --outdir ./dist --target bun"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@nextflow/database": "workspace:*",
+    "@nextflow/shared": "workspace:*",
+    "bullmq": "^5.8.0",
+    "hono": "^4.4.0",
+    "imagekit": "^6.0.0",
+    "ioredis": "^5.4.1",
+    "razorpay": "^2.9.8",
+    "resend": "^6.19.0",
+    "sharp": "^0.34.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20"
+  }
+}

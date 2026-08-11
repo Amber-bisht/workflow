@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── NextAuth (Google OAuth) Models ──────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  workflows     Workflow[]
+  credits       UserCredits?
+  transactions  CreditTransaction[]
+  credentials   Credential[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ── Workflow Engine Models ──────────────────────────────────────────────────
+model Workflow {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nodes       Json          // Array of React Flow Nodes
+  edges       Json          // Array of React Flow Edges
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  runs        WorkflowRun[]
+
+  @@index([userId])
+}
+
+model WorkflowRun {
+  id            String    @id @default(uuid())
+  workflowId    String
+  workflow      Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status        String    // PENDING, RUNNING, SUCCESS, FAILED, PARTIAL
+  duration      Float?    // In seconds
+  scope         String    // FULL, PARTIAL, SINGLE
+  triggerSource String    // MANUAL, API
+  nodesData     Json?     // Snapshot of nodes with inputs and outputs
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  nodeRuns      NodeRun[]
+
+  @@index([workflowId])
+}
+
+model NodeRun {
+  id            String      @id @default(uuid())
+  workflowRunId String
+  workflowRun   WorkflowRun @relation(fields: [workflowRunId], references: [id], onDelete: Cascade)
+  nodeId        String      // ID of the node in the React Flow graph
+  nodeType      String      // RequestInputs, CropImage, Gemini, Response
+  status        String      // PENDING, RUNNING, SUCCESS, FAILED
+  inputs        Json?
+  outputs       Json?
+  duration      Float?      // In seconds
+  error         String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  @@index([workflowRunId])
+  @@index([nodeId])
+}
+
+// ── Billing & Credits ────────────────────────────────────────────────────────
+model UserCredits {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  freeCredits    Int      @default(100)  // resets monthly
+  paidCredits    Int      @default(0)    // from Razorpay purchases
+  cycleStartDate DateTime @default(now()) // anchor date for monthly reset
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model CreditTransaction {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount          Int      // positive = added, negative = spent
+  reason          String   // FREE_GRANT | STARTER_TOPUP | NODE_RUN
+  nodeType        String?  // which node consumed credits
+  workflowRunId   String?
+  nodeRunId       String?
+  razorpayOrderId String?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ── Credential Vault ─────────────────────────────────────────────────────────
+model Credential {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String   // e.g. "My Telegram Bot"
+  type      String   // TELEGRAM | RESEND | OPENROUTER | TAVILY | CUSTOM
+  data      String   @db.Text // AES-256-GCM encrypted JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}

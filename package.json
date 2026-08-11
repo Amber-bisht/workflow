@@ -1,0 +1,19 @@
+{
+  "name": "nextflow-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "bun --filter @nextflow/web dev",
+    "dev:backend": "bun --filter @nextflow/backend dev",
+    "dev": "bun run --filter '*' dev",
+    "build": "bun run --filter '*' build",
+    "db:generate": "bun --filter @nextflow/database generate",
+    "db:push": "bun --filter @nextflow/database push"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
