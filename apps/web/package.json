@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "cd ../../packages/database && npx prisma generate && next build",
+    "postinstall": "cd ../../packages/database && npx prisma generate",
     "start": "next start",
     "lint": "next lint"
   },
