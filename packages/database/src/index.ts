@@ -37,12 +37,17 @@ const connectionString =
 // Enable SSL for remote PostgreSQL hosts (e.g. Supabase, AWS RDS)
 const isRemote =
   connectionString.includes("supabase.co") ||
+  connectionString.includes("supabase.com") ||
+  connectionString.includes("pooler") ||
   connectionString.includes("amazonaws.com") ||
   !connectionString.includes("localhost");
 
 const pool = new pg.Pool({
   connectionString,
   ssl: isRemote ? { rejectUnauthorized: false } : undefined,
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  max: 10,
 });
 
 const adapter = new PrismaPg(pool);
