@@ -16,11 +16,17 @@ export interface WorkflowState {
   undoStack: { nodes: Node[]; edges: Edge[] }[];
   redoStack: { nodes: Node[]; edges: Edge[] }[];
   
-  // Execution statuses
+  // Execution & UI View State
+  workflowId: string | null;
+  selectedNodeId: string | null;
+  viewMode: "COMPACT" | "EXPANDED";
   runningNodeIds: string[];
   runStatus: "IDLE" | "RUNNING" | "SUCCESS" | "FAILED" | "PARTIAL";
   activeRunId: string | null;
 
+  setWorkflowId: (workflowId: string) => void;
+  setSelectedNodeId: (id: string | null) => void;
+  setViewMode: (mode: "COMPACT" | "EXPANDED") => void;
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
   onNodesChange: OnNodesChange;
@@ -97,10 +103,16 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   edges: [],
   undoStack: [],
   redoStack: [],
+  workflowId: null,
+  selectedNodeId: null,
+  viewMode: "COMPACT",
   runningNodeIds: [],
   runStatus: "IDLE",
   activeRunId: null,
 
+  setWorkflowId: (workflowId) => set({ workflowId }),
+  setSelectedNodeId: (selectedNodeId) => set({ selectedNodeId }),
+  setViewMode: (viewMode) => set({ viewMode }),
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
 

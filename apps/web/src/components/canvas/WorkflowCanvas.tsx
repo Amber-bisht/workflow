@@ -35,7 +35,8 @@ import {
   ChevronRight,
   Move,
   Map,
-  Key
+  Key,
+  LayoutGrid
 } from "lucide-react";
 import Link from "next/link";
 
@@ -43,6 +44,7 @@ import { useWorkflowStore } from "@/lib/store";
 import { nodeTypes } from "../nodes";
 import NodePicker from "./NodePicker";
 import HistorySidebar from "./HistorySidebar";
+import NodeInspectorDrawer from "./NodeInspectorDrawer";
 import { updateWorkflow } from "@/app/actions/workflow";
 import type { Connection } from "@xyflow/react";
 
@@ -87,6 +89,11 @@ function CanvasInner({
   const { 
     nodes, 
     edges, 
+    setWorkflowId,
+    viewMode,
+    setViewMode,
+    selectedNodeId,
+    setSelectedNodeId,
     setNodes, 
     setEdges, 
     onNodesChange, 
@@ -123,6 +130,7 @@ function CanvasInner({
 
   // 1. Initialize canvas state
   useEffect(() => {
+    setWorkflowId(workflowId);
     setNodes(initialNodes);
     setEdges(initialEdges);
     console.info("[NextFlow Canvas] Grid initialized:", {
@@ -465,7 +473,7 @@ function CanvasInner({
         </div>
 
         {/* Right Floating Card: Status & Execution Controls */}
-        <div className="bg-neutral-900/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-2xl text-white pointer-events-auto">
+        <div className="bg-[#1a1b24] border border-white/15 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-2xl text-white pointer-events-auto">
           {getStatusIndicator()}
 
           {/* Run Execution */}
@@ -527,6 +535,8 @@ function CanvasInner({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onNodeClick={(_, node) => setSelectedNodeId(node.id)}
+          onPaneClick={() => setSelectedNodeId(null)}
           isValidConnection={isValidConnection}
           nodeTypes={nodeTypes}
           fitView
@@ -737,6 +747,9 @@ function CanvasInner({
           onClose={() => setIsSidebarOpen(false)}
         />
       )}
+
+      {/* Right Slide-over Node Inspector Drawer */}
+      <NodeInspectorDrawer />
     </div>
   );
 }

@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Position, Handle } from "@xyflow/react";
-import { Mail, X, Sparkles } from "lucide-react";
 import { useWorkflowStore } from "@/lib/store";
-import { WiredInput } from "./WiredInput";
 
 interface ResendEmailNodeProps {
   id: string;
@@ -19,168 +16,65 @@ interface ResendEmailNodeProps {
   selected?: boolean;
 }
 
+// Real Resend Mail Vector Logo
+function ResendMailLogo({ className = "w-5 h-5 text-rose-500" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+    </svg>
+  );
+}
+
 export default function ResendEmailNode({ id, data, selected }: ResendEmailNodeProps) {
-  const { updateNodeData, runningNodeIds, deleteNode } = useWorkflowStore();
+  const { runningNodeIds, setSelectedNodeId } = useWorkflowStore();
 
   const isRunning = runningNodeIds.includes(id);
   const to = data.to || "";
-  const subject = data.subject || "Workflow Automation Report";
-  const body = data.body || "";
-  const credentialId = data.credentialId || "";
-  const outputResult = data.outputResult || "";
-
-  const [savedCredentials, setSavedCredentials] = useState<{ id: string; name: string }[]>([]);
-
-  useEffect(() => {
-    fetch("/api/credentials?userId=default_user")
-      .then((res) => res.json())
-      .then((resData) => {
-        if (resData.success && Array.isArray(resData.credentials)) {
-          const resendCreds = resData.credentials.filter((c: any) => c.type === "RESEND");
-          setSavedCredentials(resendCreds);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   return (
-    <div
-      className={`w-[290px] bg-white text-neutral-800 border ${
-        isRunning
-          ? "node-running"
-          : selected
-          ? "border-rose-500/85 shadow-[0_4px_20px_rgba(244,63,94,0.15)]"
-          : "border-neutral-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-      } rounded-xl text-xs transition-all relative`}
+    <div 
+      onClick={() => setSelectedNodeId(id)}
+      className="flex flex-col items-center cursor-pointer group select-none"
     >
-      {/* Node Header */}
-      <div className="bg-neutral-50/80 border-b border-neutral-200/80 px-4 py-3 flex items-center justify-between rounded-t-xl">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200/60">
-            <Mail className="w-4 h-4" />
-          </div>
-          <div>
-            <h4 className="font-bold text-neutral-800 leading-tight">Resend Email</h4>
-            <span className="text-[9px] text-neutral-500 block uppercase tracking-wider font-semibold">Transactional Email (1 Credit)</span>
-          </div>
+      {/* Solid Compact Card */}
+      <div
+        className={`w-[85px] h-[85px] bg-[#14151f] border-2 ${
+          isRunning
+            ? "border-rose-400 ring-4 ring-rose-400/30 animate-pulse"
+            : selected
+            ? "border-rose-400 ring-2 ring-rose-400/50 shadow-xl"
+            : "border-neutral-800 hover:border-rose-400/70 shadow-lg"
+        } rounded-2xl flex flex-col items-center justify-center relative transition-all`}
+      >
+        {/* Target input handle */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          id="body"
+          className="!w-3.5 !h-3.5 !bg-rose-400 !border-2 !border-[#14151f] transition-transform hover:!scale-125 !-left-2"
+        />
+
+        <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 shadow-md group-hover:scale-110 transition-transform">
+          <ResendMailLogo className="w-6 h-6 text-rose-400" />
         </div>
 
-        <div className="flex items-center gap-2">
-          {isRunning && (
-            <span className="flex items-center gap-1 text-[9px] font-bold text-rose-600 uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-              <Sparkles className="h-2.5 w-2.5 animate-pulse text-rose-500" /> Sending
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => deleteNode(id)}
-            title="Delete node"
-            className="p-1 rounded text-neutral-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Inputs Stack */}
-      <div className="flex flex-col border-b border-neutral-200/80">
-        {/* Credential Account Selector */}
-        <div className="py-2.5 px-4 border-b border-neutral-100 flex flex-col gap-1 bg-rose-50/20">
-          <label className="text-[10px] font-bold text-rose-700 uppercase tracking-wider block">
-            Sender Account & Key
-          </label>
-          <select
-            value={credentialId}
-            onChange={(e) => updateNodeData(id, "credentialId", e.target.value)}
-            className="w-full bg-white border border-neutral-200 rounded px-2.5 py-1 text-xs text-neutral-800 focus:outline-none focus:border-rose-500 font-medium"
-          >
-            <option value="">Default NextFlow Service (notifications@amberbisht.me)</option>
-            {savedCredentials.map((cred) => (
-              <option key={cred.id} value={cred.id}>
-                📧 {cred.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        {/* Recipient Email */}
-        <div className="py-2.5 px-4 border-b border-neutral-100 flex flex-col gap-1 bg-neutral-50/20">
-          <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider block">
-            Recipient Email (To)
-          </label>
-          <input
-            type="email"
-            value={to}
-            onChange={(e) => updateNodeData(id, "to", e.target.value)}
-            placeholder="user@example.com"
-            className="w-full bg-white border border-neutral-200 rounded px-2.5 py-1 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-rose-500"
-          />
-          <span className="text-[10px] text-neutral-400 leading-tight block mt-0.5">
-            💡 Sends from <strong className="text-rose-600 font-bold">notifications@amberbisht.me</strong> by default. Add your Resend Key in <strong className="text-rose-600 font-bold">Credentials Vault</strong> to send from custom domain.
-          </span>
-        </div>
-
-        {/* Email Subject */}
-        <div className="py-2 px-4 border-b border-neutral-100 flex items-center gap-2 bg-neutral-50/20">
-          <div className="flex-1">
-            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">
-              Email Subject
-            </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => updateNodeData(id, "subject", e.target.value)}
-              placeholder="Workflow alert..."
-              className="w-full bg-white border border-neutral-200 rounded px-2.5 py-1 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-rose-500"
-            />
-          </div>
-        </div>
-
-        {/* Body Port */}
-        <div className="relative py-2.5 px-4 flex items-center gap-2 bg-neutral-50/20">
-          <Handle
-            type="target"
-            position={Position.Left}
-            id="body"
-            className="!w-3 !h-3 !bg-rose-500 !border-2 !border-white transition-transform hover:!scale-125"
-          />
-          <div className="flex-1">
-            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">
-              Email Body Content
-            </label>
-            <WiredInput
-              nodeId={id}
-              handleId="body"
-              label="Email Body Content"
-              value={body}
-              onChange={(val) => updateNodeData(id, "body", val)}
-              placeholder="Email body text or HTML payload..."
-              type="textarea"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Dispatch Output */}
-      {outputResult && (
-        <div className="p-3 bg-neutral-50 rounded-b-xl border-t border-neutral-200/60 font-mono text-[11px]">
-          <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
-            Email Delivery Result
-          </span>
-          <div className="text-rose-600 font-bold">{outputResult}</div>
-        </div>
-      )}
-
-      {/* Output Handle */}
-      <div className="relative py-2 px-4 flex items-center justify-end bg-neutral-50/50 rounded-b-xl">
-        <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider mr-2">
-          Email Payload
-        </span>
+        {/* Source output handle */}
         <Handle
           type="source"
           position={Position.Right}
           id="outputResult"
-          className="!w-3 !h-3 !bg-rose-500 !border-2 !border-white transition-transform hover:!scale-125"
+          className="!w-3.5 !h-3.5 !bg-rose-400 !border-2 !border-[#14151f] transition-transform hover:!scale-125 !-right-2"
         />
+      </div>
+
+      {/* High-contrast solid text labels below node */}
+      <div className="mt-2 text-center max-w-[140px]">
+        <h4 className="font-bold text-neutral-900 text-xs tracking-tight truncate group-hover:text-rose-600 transition-colors">
+          Resend Email
+        </h4>
+        <span className="text-[10px] text-neutral-700 font-mono font-semibold block truncate">
+          {to ? to : "Transactional Email"}
+        </span>
       </div>
     </div>
   );

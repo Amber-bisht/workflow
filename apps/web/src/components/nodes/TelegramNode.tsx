@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Position, Handle } from "@xyflow/react";
-import { Send, X, Sparkles } from "lucide-react";
+import { Send } from "lucide-react";
 import { useWorkflowStore } from "@/lib/store";
-import { WiredInput } from "./WiredInput";
 
 interface TelegramNodeProps {
   id: string;
@@ -19,151 +18,55 @@ interface TelegramNodeProps {
 }
 
 export default function TelegramNode({ id, data, selected }: TelegramNodeProps) {
-  const { updateNodeData, runningNodeIds, deleteNode } = useWorkflowStore();
+  const { runningNodeIds, workflowId, setSelectedNodeId } = useWorkflowStore();
 
   const isRunning = runningNodeIds.includes(id);
-  const message = data.message || "";
-  const chatId = data.chatId || "";
-  const credentialId = data.credentialId || "";
-  const outputResult = data.outputResult || "";
-
-  const [savedCredentials, setSavedCredentials] = useState<{ id: string; name: string }[]>([]);
-
-  useEffect(() => {
-    fetch("/api/credentials?userId=default_user")
-      .then((res) => res.json())
-      .then((resData) => {
-        if (resData.success && Array.isArray(resData.credentials)) {
-          const tgCreds = resData.credentials.filter((c: any) => c.type === "TELEGRAM");
-          setSavedCredentials(tgCreds);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const credentialId = data.credentialId || data.secretTag || "";
 
   return (
-    <div
-      className={`w-[290px] bg-white text-neutral-800 border ${
-        isRunning
-          ? "node-running"
-          : selected
-          ? "border-sky-500/85 shadow-[0_4px_20px_rgba(14,165,233,0.15)]"
-          : "border-neutral-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-      } rounded-xl text-xs transition-all relative`}
+    <div 
+      onClick={() => setSelectedNodeId(id)}
+      className="flex flex-col items-center cursor-pointer group select-none"
     >
-      {/* Node Header */}
-      <div className="bg-neutral-50/80 border-b border-neutral-200/80 px-4 py-3 flex items-center justify-between rounded-t-xl">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-sky-50 text-sky-600 border border-sky-200/60">
-            <Send className="w-4 h-4" />
-          </div>
-          <div>
-            <h4 className="font-bold text-neutral-800 leading-tight">Telegram Bot Alert</h4>
-            <span className="text-[9px] text-neutral-500 block uppercase tracking-wider font-semibold">Push Alert Message (1 Credit)</span>
-          </div>
+      {/* Solid Compact Card */}
+      <div
+        className={`w-[85px] h-[85px] bg-[#14151f] border-2 ${
+          isRunning
+            ? "border-sky-400 ring-4 ring-sky-400/30 animate-pulse"
+            : selected
+            ? "border-sky-400 ring-2 ring-sky-400/50 shadow-xl"
+            : "border-neutral-800 hover:border-sky-400/70 shadow-lg"
+        } rounded-2xl flex flex-col items-center justify-center relative transition-all`}
+      >
+        {/* Target input handle */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          id="message"
+          className="!w-3.5 !h-3.5 !bg-sky-400 !border-2 !border-[#14151f] transition-transform hover:!scale-125 !-left-2"
+        />
+
+        <div className="p-3 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 shadow-md group-hover:scale-110 transition-transform">
+          <Send className="w-6 h-6" />
         </div>
 
-        <div className="flex items-center gap-2">
-          {isRunning && (
-            <span className="flex items-center gap-1 text-[9px] font-bold text-sky-600 uppercase tracking-widest bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
-              <Sparkles className="h-2.5 w-2.5 animate-pulse text-sky-500" /> Sending
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => deleteNode(id)}
-            title="Delete node"
-            className="p-1 rounded text-neutral-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Inputs Stack */}
-      <div className="flex flex-col border-b border-neutral-200/80">
-        {/* Credential Account Selector */}
-        <div className="py-2.5 px-4 border-b border-neutral-100 flex flex-col gap-1 bg-sky-50/20">
-          <label className="text-[10px] font-bold text-sky-700 uppercase tracking-wider block">
-            Target Bot Account
-          </label>
-          <select
-            value={credentialId}
-            onChange={(e) => updateNodeData(id, "credentialId", e.target.value)}
-            className="w-full bg-white border border-neutral-200 rounded px-2.5 py-1 text-xs text-neutral-800 focus:outline-none focus:border-sky-500 font-medium"
-          >
-            <option value="">Default Platform Bot (@NextFlowAlertsBot)</option>
-            {savedCredentials.map((cred) => (
-              <option key={cred.id} value={cred.id}>
-                🤖 {cred.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Chat ID Input */}
-        <div className="py-2.5 px-4 border-b border-neutral-100 flex flex-col gap-1 bg-neutral-50/20">
-          <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider block">
-            Telegram Chat ID (Optional)
-          </label>
-          <input
-            type="text"
-            value={chatId}
-            onChange={(e) => updateNodeData(id, "chatId", e.target.value)}
-            placeholder="Default Chat ID (e.g. -100...)"
-            className="w-full bg-white border border-neutral-200 rounded px-2.5 py-1 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-sky-500"
-          />
-          <span className="text-[10px] text-neutral-400 leading-tight block mt-0.5">
-            💡 Add <strong className="text-sky-600 font-bold">@NextFlowAlertsBot</strong> to your chat or select your saved Bot in <strong className="text-sky-600 font-bold">Credentials Vault</strong>.
-          </span>
-        </div>
-
-        {/* Alert Message Input Port */}
-        <div className="relative py-2.5 px-4 flex items-center gap-2 bg-neutral-50/20">
-          <Handle
-            type="target"
-            position={Position.Left}
-            id="message"
-            className="!w-3 !h-3 !bg-sky-500 !border-2 !border-white transition-transform hover:!scale-125"
-          />
-          <div className="flex-1">
-            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">
-              Alert Message Text
-            </label>
-            <WiredInput
-              nodeId={id}
-              handleId="message"
-              label="Alert Message Text"
-              value={message}
-              onChange={(val) => updateNodeData(id, "message", val)}
-              placeholder="Alert notification payload..."
-              type="textarea"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Dispatch Output */}
-      {outputResult && (
-        <div className="p-3 bg-neutral-50 rounded-b-xl border-t border-neutral-200/60 font-mono text-[11px]">
-          <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
-            Delivery Status
-          </span>
-          <div className="text-sky-600 font-bold">{outputResult}</div>
-        </div>
-      )}
-
-      {/* Output Handle */}
-      <div className="relative py-2 px-4 flex items-center justify-end bg-neutral-50/50 rounded-b-xl">
-        <span className="text-[10px] font-bold text-sky-600 uppercase tracking-wider mr-2">
-          Alert Payload
-        </span>
+        {/* Source output handle */}
         <Handle
           type="source"
           position={Position.Right}
           id="outputResult"
-          className="!w-3 !h-3 !bg-sky-500 !border-2 !border-white transition-transform hover:!scale-125"
+          className="!w-3.5 !h-3.5 !bg-sky-400 !border-2 !border-[#14151f] transition-transform hover:!scale-125 !-right-2"
         />
+      </div>
+
+      {/* High-contrast solid text labels below node */}
+      <div className="mt-2 text-center max-w-[140px]">
+        <h4 className="font-bold text-neutral-900 text-xs tracking-tight truncate group-hover:text-sky-600 transition-colors">
+          Telegram Bot
+        </h4>
+        <span className="text-[10px] text-neutral-700 font-mono font-semibold block truncate">
+          {credentialId ? credentialId : "Default Bot"}
+        </span>
       </div>
     </div>
   );
