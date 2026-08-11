@@ -23,9 +23,13 @@ import {
   Play,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  CreditCard,
+  User
 } from "lucide-react";
 import { createWorkflow, deleteWorkflow, renameWorkflow, importWorkflow } from "../actions/workflow";
+import AppSidebar from "@/components/AppSidebar";
+import AppHeader from "@/components/AppHeader";
 
 interface WorkflowWithRuns {
   id: string;
@@ -214,156 +218,41 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
     <div className="flex h-screen w-screen bg-[#030507] text-white font-sans overflow-hidden selection:bg-white selection:text-black">
       
       {/* ── Dark Left Sidebar ────────────────────────────────────────────────── */}
-      <aside
-        className={`h-full bg-black border-r border-white/10 flex flex-col justify-between p-4 transition-all duration-300 z-30 ${
-          isCollapsed ? "w-16 items-center" : "w-64"
-        }`}
-      >
-        {/* Top Header & Brand */}
-        <div className="flex flex-col gap-6 w-full">
-          <div className="flex items-center justify-between w-full">
-            {!isCollapsed && (
-              <Link href="/" className="flex items-center gap-2.5">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                  <rect x="2" y="3" width="5" height="18" rx="2.5" />
-                  <rect x="9" y="8" width="5" height="5" rx="2.5" />
-                  <rect x="9" y="15" width="5" height="5" rx="2.5" />
-                  <rect x="16" y="11" width="5" height="5" rx="2.5" />
-                </svg>
-                <span className="font-bold text-sm tracking-tight text-white font-mono">
-                  automation.amberbisht.me
-                </span>
-              </Link>
-            )}
-
-            {/* Collapse toggle */}
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border border-white/10 bg-neutral-900 cursor-pointer"
-              title={isCollapsed ? "Expand sidebar (⌘.)" : "Collapse sidebar (⌘.)"}
-            >
-              {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            </button>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="flex flex-col gap-1 w-full">
-            <button
-              onClick={() => setIsCreateOpen(true)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition-all cursor-pointer w-full shadow-md ${
-                isCollapsed ? "justify-center px-0" : ""
-              }`}
-            >
-              <Plus className="w-4 h-4 shrink-0" />
-              {!isCollapsed && <span>New Workflow</span>}
-            </button>
-
-            <div className="h-[1px] bg-white/10 my-2 w-full" />
-
-            {/* Nav item: Workflows (Active) */}
-            <button
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl bg-white/10 text-white font-medium text-xs border border-white/10 w-full ${
-                isCollapsed ? "justify-center px-0" : ""
-              }`}
-            >
-              <Workflow className="w-4 h-4 text-blue-400 shrink-0" />
-              {!isCollapsed && <span>Workflows</span>}
-            </button>
-
-            {/* Nav item: Node Library */}
-            <button
-              onClick={() => setIsCreateOpen(true)}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 transition-all text-xs font-medium w-full cursor-pointer ${
-                isCollapsed ? "justify-center px-0" : ""
-              }`}
-            >
-              <Layers className="w-4 h-4 text-neutral-500 shrink-0" />
-              {!isCollapsed && <span>Node Library</span>}
-            </button>
-          </nav>
-        </div>
-
-        {/* User Profile & Sign Out at bottom */}
-        <div className="flex flex-col gap-3 w-full border-t border-white/10 pt-4">
-          {isCollapsed ? (
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              title="Sign Out"
-              className="p-2 rounded-xl hover:bg-white/10 text-neutral-400 hover:text-white transition-colors flex justify-center cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          ) : (
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                {user?.image ? (
-                  <img src={user.image} alt="User Avatar" className="w-8 h-8 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                    {user?.name?.charAt(0) || "U"}
-                  </div>
-                )}
-                <div className="overflow-hidden">
-                  <p className="text-xs font-bold text-white truncate">{user?.name || "User"}</p>
-                  <p className="text-[10px] text-neutral-500 truncate">{user?.email || ""}</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                title="Sign Out"
-                className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer shrink-0"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
-      </aside>
+      <AppSidebar activePath="workflows" onNewWorkflow={() => setIsCreateOpen(true)} />
 
       {/* ── Main Workflows Panel ─────────────────────────────────────────────── */}
       <main className="flex-1 h-full overflow-y-auto p-6 sm:p-10">
         <div className="max-w-7xl mx-auto space-y-10">
 
           {/* Top Header */}
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <span className="text-[11px] font-bold font-mono text-neutral-500 uppercase tracking-widest">
-                Dashboard
-              </span>
-              <h1 className="text-3xl font-bold tracking-tight text-white mt-1">
-                Workflows
-              </h1>
-              <p className="text-neutral-400 text-xs sm:text-sm mt-1">
-                Build visual AI node graphs, connect APIs, and inspect execution logs.
-              </p>
-            </div>
+          <AppHeader
+            title="Workflows"
+            subtitle="Build visual AI node graphs, connect APIs, and inspect execution logs."
+            badgeText="Dashboard"
+          >
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-white/10 hover:border-white/20 text-neutral-200 text-xs font-semibold rounded-full transition-all cursor-pointer"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              Import Layout
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImport}
+              accept=".json"
+              className="hidden"
+            />
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-white/10 hover:border-white/20 text-neutral-200 text-xs font-semibold rounded-full transition-all cursor-pointer"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                Import Layout
-              </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImport}
-                accept=".json"
-                className="hidden"
-              />
-
-              <button
-                onClick={() => setIsCreateOpen(true)}
-                className="inline-flex items-center gap-2 px-5 py-2 bg-white text-black font-semibold text-xs rounded-full hover:bg-neutral-200 transition-all cursor-pointer shadow-md active:scale-95"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                New Workflow
-              </button>
-            </div>
-          </div>
+            <button
+              onClick={() => setIsCreateOpen(true)}
+              className="inline-flex items-center gap-2 px-5 py-2 bg-white text-black font-semibold text-xs rounded-full hover:bg-neutral-200 transition-all cursor-pointer shadow-md active:scale-95"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              New Workflow
+            </button>
+          </AppHeader>
 
 
 

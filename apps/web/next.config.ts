@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         source: "/api/workflow/stream/:path*",
         destination: `${backendUrl}/api/workflow/stream/:path*`,
       },
+      {
+        source: "/api/billing/:path*",
+        destination: `${backendUrl}/api/billing/:path*`,
+      },
     ];
   },
 };
