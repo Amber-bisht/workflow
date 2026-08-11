@@ -9,7 +9,11 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:4000";
+    const defaultUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://api-automation.amberbisht.me"
+        : "http://localhost:4000";
+    const backendUrl = (process.env.BACKEND_URL || defaultUrl).replace(/\/+$/, "");
     return [
       {
         source: "/api/workflow/:path*",
