@@ -11,9 +11,11 @@
     "dev": "bun run --filter '*' dev",
     "build": "bun run --filter '*' build",
     "db:generate": "bun --filter @nextflow/database generate",
-    "db:push": "bun --filter @nextflow/database push"
+    "db:push": "bun --filter @nextflow/database push",
+    "db:migrate": "bun --filter @nextflow/database migrate"
   },
   "devDependencies": {
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/node": "^20"
   }
 }

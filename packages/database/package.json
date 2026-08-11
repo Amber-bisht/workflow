@@ -4,9 +4,17 @@
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "scripts": {
     "generate": "prisma generate",
-    "push": "prisma db push"
+    "push": "prisma db push",
+    "migrate": "prisma migrate dev"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -16,7 +24,6 @@
   },
   "devDependencies": {
     "@types/pg": "^8.11.6",
-    "prisma": "^7.8.0",
-    "typescript": "^5"
+    "prisma": "^7.8.0"
   }
 }
