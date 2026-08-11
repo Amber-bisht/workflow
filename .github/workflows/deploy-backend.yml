@@ -140,9 +140,10 @@ jobs:
             echo "🎉 Verification Health Status:"
             curl -s http://localhost:4000/health || echo "Running on port 4000"
 
-            # 8. Cleanup old dangling images
-            echo "🧹 Cleaning old Docker images..."
-            sudo docker image prune -f
+            # 8. Cleanup all old unused Docker images & containers
+            echo "🧹 Cleaning all old Docker images..."
+            sudo docker container prune -f
+            sudo docker image prune -a -f
 
             echo "========================================="
             echo "✅ NextFlow Backend Successfully Deployed to EC2!"
