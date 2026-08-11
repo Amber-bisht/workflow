@@ -25,7 +25,9 @@ import {
   Clock,
   AlertCircle,
   CreditCard,
-  User
+  User,
+  Calendar,
+  ArrowRight
 } from "lucide-react";
 import { createWorkflow, deleteWorkflow, renameWorkflow, importWorkflow } from "../actions/workflow";
 import AppSidebar from "@/components/AppSidebar";
@@ -312,47 +314,71 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
                     <div
                       key={flow.id}
                       onClick={() => router.push(`/workflow/${flow.id}`)}
-                      className="group rounded-2xl border border-white/10 bg-neutral-900/70 hover:bg-neutral-900 p-6 flex flex-col justify-between gap-6 hover:border-white/25 transition-all duration-200 cursor-pointer shadow-lg relative overflow-hidden"
+                      className="group rounded-3xl border border-white/10 bg-neutral-900/60 hover:bg-neutral-900/90 p-6 flex flex-col justify-between gap-5 hover:border-white/20 transition-all duration-300 backdrop-blur-xl shadow-xl hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] cursor-pointer relative overflow-hidden"
                     >
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <h4 className="font-bold text-white text-base tracking-tight truncate group-hover:text-blue-400 transition-colors">
-                            {flow.name}
-                          </h4>
-                          {latestRun && <StatusTag status={latestRun.status} />}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all shrink-0">
+                              <Workflow className="w-4 h-4 text-neutral-400 group-hover:text-blue-400 transition-colors" />
+                            </div>
+                            <h4 className="font-bold text-white text-base tracking-tight truncate group-hover:text-blue-400 transition-colors">
+                              {flow.name}
+                            </h4>
+                          </div>
+
+                          {latestRun ? (
+                            <StatusTag status={latestRun.status} />
+                          ) : (
+                            <span className="text-[10px] font-mono font-bold text-neutral-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full shrink-0">
+                              Canvas
+                            </span>
+                          )}
                         </div>
+
                         <p className="text-neutral-400 text-xs line-clamp-2 leading-relaxed min-h-[2.5rem]">
-                          {flow.description || "Visual node workflow."}
+                          {flow.description || "Visual node workflow pipeline."}
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between pt-4 border-t border-white/5 text-[11px] text-neutral-500 font-mono">
-                        <span suppressHydrationWarning>{formatDate(flow.updatedAt)}</span>
+                      <div className="space-y-3 pt-2">
+                        <div className="h-[1px] bg-white/10" />
 
-                        {/* Actions on hover */}
-                        <div
-                          className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            onClick={() => {
-                              setActiveWorkflowId(flow.id);
-                              setRenameValue(flow.name);
-                              setRenameDescValue(flow.description || "");
-                              setIsRenameOpen(true);
-                            }}
-                            title="Rename"
-                            className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(flow.id)}
-                            title="Delete"
-                            className="p-1.5 rounded-lg hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                        <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
+                          <div className="flex items-center gap-1.5 text-neutral-400">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span suppressHydrationWarning>{formatDate(flow.updatedAt)}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {/* Actions */}
+                            <div
+                              className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                onClick={() => {
+                                  setActiveWorkflowId(flow.id);
+                                  setRenameValue(flow.name);
+                                  setRenameDescValue(flow.description || "");
+                                  setIsRenameOpen(true);
+                                }}
+                                title="Rename Workflow"
+                                className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(flow.id)}
+                                title="Delete Workflow"
+                                className="p-1.5 rounded-lg hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            <ArrowRight className="w-4 h-4 text-neutral-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                          </div>
                         </div>
                       </div>
                     </div>

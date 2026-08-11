@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 interface AppSidebarProps {
-  activePath: "workflows" | "profile" | "billing";
+  activePath: "workflows" | "nodes" | "profile" | "billing";
   onNewWorkflow?: () => void;
 }
 
@@ -106,15 +106,17 @@ export default function AppSidebar({ activePath, onNewWorkflow }: AppSidebarProp
           </Link>
 
           {/* Nav item: Node Library */}
-          <button
-            onClick={handleNewClick}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 transition-all text-xs font-semibold w-full cursor-pointer ${
-              isCollapsed ? "justify-center px-0" : ""
-            }`}
+          <Link
+            href="/nodes"
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs font-semibold w-full cursor-pointer ${
+              activePath === "nodes"
+                ? "bg-white/10 text-white border border-white/15"
+                : "text-neutral-400 hover:text-white hover:bg-white/5"
+            } ${isCollapsed ? "justify-center px-0" : ""}`}
           >
-            <Layers className="w-4 h-4 text-neutral-500 shrink-0" />
+            <Layers className={`w-4 h-4 shrink-0 ${activePath === "nodes" ? "text-purple-400" : "text-neutral-500"}`} />
             {!isCollapsed && <span>Node Library</span>}
-          </button>
+          </Link>
 
           {/* Nav item: My Profile */}
           <Link

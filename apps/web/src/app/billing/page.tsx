@@ -10,7 +10,8 @@ import {
   CreditCard,
   Sparkles,
   Loader2,
-  RefreshCw,
+  Shield,
+  ArrowRight
 } from "lucide-react";
 import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/AppHeader";
@@ -111,7 +112,7 @@ export default function BillingPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": user.id,
+          "x-user-id": user.id || "",
         },
         body: JSON.stringify({ planId }),
       });
@@ -136,7 +137,7 @@ export default function BillingPage() {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                "x-user-id": user.id,
+                "x-user-id": user.id || "",
               },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
@@ -197,61 +198,54 @@ export default function BillingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             
             {/* Card 1: Total Credits Available */}
-            <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-6 space-y-3 shadow-lg">
-              <div className="flex items-center justify-between text-neutral-400 text-xs font-semibold font-mono uppercase tracking-wider">
-                <span>Total Available Credits</span>
-                <Zap className="w-4 h-4 text-amber-400" />
+            <div className="rounded-3xl border border-white/10 bg-neutral-900/60 p-6 space-y-3 shadow-xl backdrop-blur-xl hover:border-white/20 transition-all">
+              <div className="text-neutral-400 text-xs font-semibold font-mono uppercase tracking-wider">
+                <span>Total Available</span>
               </div>
               <div className="text-3xl font-bold text-white tracking-tight">
                 {loadingCredits ? <Loader2 className="w-6 h-6 animate-spin text-neutral-500" /> : (credits?.total ?? 100)}
+                <span className="text-xs font-mono font-normal text-neutral-400 ml-2">Credits</span>
               </div>
-              <p className="text-[11px] text-neutral-500 leading-relaxed">
-                Resets monthly or tops up instantly via Razorpay.
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Available for instant multi-node workflow execution.
               </p>
             </div>
 
-            {/* Card 2: Free Credits */}
-            <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-6 space-y-3 shadow-lg">
-              <div className="flex items-center justify-between text-neutral-400 text-xs font-semibold font-mono uppercase tracking-wider">
-                <span>Monthly Free Credits</span>
-                <Sparkles className="w-4 h-4 text-blue-400" />
+            {/* Card 2: Free Monthly Credits */}
+            <div className="rounded-3xl border border-white/10 bg-neutral-900/60 p-6 space-y-3 shadow-xl backdrop-blur-xl hover:border-white/20 transition-all">
+              <div className="text-neutral-400 text-xs font-semibold font-mono uppercase tracking-wider">
+                <span>Free Monthly Credits</span>
               </div>
               <div className="text-3xl font-bold text-white tracking-tight">
                 {loadingCredits ? <Loader2 className="w-6 h-6 animate-spin text-neutral-500" /> : (credits?.freeCredits ?? 100)}
                 <span className="text-xs text-neutral-500 font-normal ml-1.5">/ 100</span>
               </div>
-              <p className="text-[11px] text-neutral-500 leading-relaxed">
+              <p className="text-xs text-neutral-400 leading-relaxed">
                 Refreshed automatically every 30 days.
               </p>
             </div>
 
             {/* Card 3: Paid Credits */}
-            <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-6 space-y-3 shadow-lg">
-              <div className="flex items-center justify-between text-neutral-400 text-xs font-semibold font-mono uppercase tracking-wider">
+            <div className="rounded-3xl border border-white/10 bg-neutral-900/60 p-6 space-y-3 shadow-xl backdrop-blur-xl hover:border-white/20 transition-all">
+              <div className="text-neutral-400 text-xs font-semibold font-mono uppercase tracking-wider">
                 <span>Paid Credits</span>
-                <CreditCard className="w-4 h-4 text-emerald-400" />
               </div>
               <div className="text-3xl font-bold text-white tracking-tight">
                 {loadingCredits ? <Loader2 className="w-6 h-6 animate-spin text-neutral-500" /> : (credits?.paidCredits ?? 0)}
               </div>
-              <p className="text-[11px] text-neutral-500 leading-relaxed">
-                Never expire. Used automatically when free credits run out.
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Top-up credits that never expire.
               </p>
             </div>
 
           </div>
 
           {/* ── Razorpay Plans & Pricing ─────────────────────────────────────────── */}
-          <div className="space-y-6 pt-4">
-            <div className="text-center space-y-2">
-              <span className="text-xs font-bold font-mono text-neutral-500 uppercase tracking-widest">
-                Upgrade & Top-up
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white">
-                Choose your automation plan.
-              </h2>
-              <p className="text-neutral-400 text-xs sm:text-sm max-w-lg mx-auto">
-                Instant activation via secure Razorpay checkout. Pay in INR via UPI, Cards, NetBanking, or Wallets.
+          <div className="space-y-6 pt-2">
+            <div className="border-b border-white/10 pb-4">
+              <h2 className="text-xl font-bold text-white tracking-tight">Available Subscription Plans</h2>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Instant activation via secure Razorpay checkout (UPI, Cards, NetBanking, Wallets).
               </p>
             </div>
 
@@ -260,19 +254,19 @@ export default function BillingPage() {
                 <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
                 {plans.map((plan) => (
                   <div
                     key={plan.id}
-                    className={`relative rounded-3xl border p-7 flex flex-col justify-between gap-6 transition-all duration-200 ${
+                    className={`relative rounded-3xl border p-7 flex flex-col justify-between gap-6 transition-all duration-300 backdrop-blur-xl ${
                       plan.highlight
-                        ? "bg-gradient-to-b from-blue-950/30 to-neutral-900 border-blue-500/40 shadow-[0_0_40px_rgba(59,130,246,0.12)] scale-[1.02]"
-                        : "bg-neutral-900/70 border-white/10"
+                        ? "bg-gradient-to-b from-blue-950/40 via-neutral-900/80 to-neutral-900 border-blue-500/40 shadow-[0_0_50px_rgba(59,130,246,0.15)] scale-[1.02]"
+                        : "bg-neutral-900/60 border-white/10 hover:border-white/20"
                     }`}
                   >
                     {plan.highlight && (
                       <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                        <span className="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
+                        <span className="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest px-3.5 py-1 rounded-full shadow-lg">
                           Best Value
                         </span>
                       </div>
@@ -281,7 +275,7 @@ export default function BillingPage() {
                     <div className="space-y-4">
                       <div>
                         <h3 className="text-lg font-bold text-white tracking-tight">{plan.name}</h3>
-                        <p className="text-neutral-500 text-xs mt-1">{plan.description}</p>
+                        <p className="text-neutral-400 text-xs mt-1">{plan.description}</p>
                       </div>
 
                       <div className="flex items-end gap-1.5">
@@ -289,16 +283,16 @@ export default function BillingPage() {
                         <span className="text-neutral-500 text-xs mb-1.5">{plan.period}</span>
                       </div>
 
-                      <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-full">
-                        <Zap className="w-3.5 h-3.5" />
+                      <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-white bg-neutral-800 border border-white/15 px-3.5 py-1.5 rounded-full shadow-inner">
+                        <Zap className="w-3.5 h-3.5 text-white fill-white/20" />
                         {plan.credits}
                       </div>
 
                       <div className="h-[1px] bg-white/10 my-4" />
 
-                      <ul className="space-y-2.5 text-xs">
+                      <ul className="space-y-3 text-xs">
                         {plan.features?.map((f: string, i: number) => (
-                          <li key={i} className="flex items-center gap-2 text-neutral-300">
+                          <li key={i} className="flex items-center gap-2.5 text-neutral-200">
                             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                             <span>{f}</span>
                           </li>
@@ -318,7 +312,7 @@ export default function BillingPage() {
                         <button
                           onClick={() => handlePayment(plan.id)}
                           disabled={purchasingPlan !== null}
-                          className={`w-full py-3 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-95 ${
+                          className={`w-full py-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95 ${
                             plan.highlight
                               ? "bg-blue-600 hover:bg-blue-500 text-white"
                               : "bg-white hover:bg-neutral-200 text-black"
@@ -327,7 +321,7 @@ export default function BillingPage() {
                           {purchasingPlan === plan.id ? (
                             <>
                               <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Initializing Razorpay...</span>
+                              <span>Initializing...</span>
                             </>
                           ) : (
                             <>
