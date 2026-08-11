@@ -52,6 +52,22 @@ export default function KreaExactLandingPage() {
 
       {/* ── Fixed Navigation Header ──────────────────────────────────────── */}
       <div className="fixed top-0 left-0 w-full z-40">
+        {/* Ticker Banner */}
+        <div className="w-full bg-blue-600 overflow-hidden py-1.5">
+          <div className="flex whitespace-nowrap animate-[ticker_22s_linear_infinite]">
+            {[...Array(6)].map((_, i) => (
+              <span key={i} className="inline-flex items-center gap-6 px-10 text-white text-xs font-medium tracking-wide shrink-0">
+                <span>⚡ This platform is made by <strong>Amber Bisht</strong></span>
+                <span className="opacity-50">·</span>
+                <span>See the work at <a href="https://amberbisht.me" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 font-semibold hover:text-blue-200 transition-colors">amberbisht.me</a></span>
+                <span className="opacity-50">·</span>
+                <span>Mail: <a href="mailto:bishtamber0@gmail.com" className="underline underline-offset-2 font-semibold hover:text-blue-200 transition-colors">bishtamber0@gmail.com</a></span>
+                <span className="opacity-50">——</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
         <header className="relative w-full mx-auto px-4 sm:px-6 lg:px-12 py-4 border-b border-white/15 backdrop-blur-xl bg-black/70 transition-all duration-300">
           <div className="flex items-center justify-between w-full max-w-7xl mx-auto">
 
@@ -117,7 +133,7 @@ export default function KreaExactLandingPage() {
           <img
             src="/hero.png"
             alt="NextFlow AI Workflow Canvas"
-            className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none select-none"
+            className="absolute inset-0 z-0 w-full h-full object-cover [object-position:center_70%] pointer-events-none select-none"
           />
 
           {/* Gradients */}
@@ -164,14 +180,14 @@ export default function KreaExactLandingPage() {
               {status === "authenticated" ? (
                 <Link
                   href="/dashboard"
-                  className="inline-flex h-10 items-center justify-center rounded-full px-10 text-[15px] font-medium text-black bg-white no-underline transition-all duration-200 hover:bg-neutral-100 active:scale-[0.98] cursor-pointer"
+                  className="inline-flex h-11 items-center justify-center rounded-full px-8 text-[15px] font-semibold text-white bg-white/15 border border-white/30 backdrop-blur-md no-underline transition-all duration-200 hover:bg-white/25 hover:border-white/50 active:scale-[0.98] cursor-pointer shadow-lg"
                 >
                   View Dashboard
                 </Link>
               ) : (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="inline-flex h-10 items-center justify-center rounded-full px-10 text-[15px] font-medium text-black bg-white no-underline transition-all duration-200 hover:bg-neutral-100 active:scale-[0.98] cursor-pointer"
+                  className="inline-flex h-11 items-center justify-center rounded-full px-8 text-[15px] font-semibold text-white bg-white/15 border border-white/30 backdrop-blur-md no-underline transition-all duration-200 hover:bg-white/25 hover:border-white/50 active:scale-[0.98] cursor-pointer shadow-lg"
                 >
                   Start for free
                 </button>
