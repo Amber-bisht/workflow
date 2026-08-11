@@ -12,16 +12,16 @@ const nextConfig: NextConfig = {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:4000";
     return [
       {
-        source: "/api/workflow/run",
-        destination: `${backendUrl}/api/workflow/run`,
-      },
-      {
-        source: "/api/workflow/stream/:path*",
-        destination: `${backendUrl}/api/workflow/stream/:path*`,
+        source: "/api/workflow/:path*",
+        destination: `${backendUrl}/api/workflow/:path*`,
       },
       {
         source: "/api/billing/:path*",
         destination: `${backendUrl}/api/billing/:path*`,
+      },
+      {
+        source: "/api/credentials/:path*",
+        destination: `${backendUrl}/api/credentials/:path*`,
       },
     ];
   },

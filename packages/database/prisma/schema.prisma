@@ -71,6 +71,7 @@ model Workflow {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   runs        WorkflowRun[]
+  secrets     WorkflowSecret[]
 
   @@index([userId])
 }
@@ -148,4 +149,17 @@ model Credential {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model WorkflowSecret {
+  id           String   @id @default(cuid())
+  workflowId   String
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  key          String   // e.g. "TG_BOT_1", "TG_BOT_2", "RESEND_KEY"
+  encryptedVal String   @db.Text // AES-256-GCM encrypted ciphertext
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([workflowId, key])
+  @@index([workflowId])
 }

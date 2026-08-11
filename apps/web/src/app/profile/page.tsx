@@ -41,12 +41,12 @@ export default function ProfilePage() {
 
       <main className="flex-1 h-full overflow-y-auto p-6 sm:p-10">
         <div className="max-w-6xl space-y-6 pb-16">
-          
+
           <AppHeader title="My Profile" />
 
           {/* Merged Single Profile Card */}
           <div className="rounded-3xl border border-white/10 bg-neutral-900/60 p-6 sm:p-8 space-y-6 shadow-2xl backdrop-blur-xl">
-            
+
             {/* Top User Info Row */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
               <div className="flex items-center gap-4">

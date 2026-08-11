@@ -34,7 +34,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Move,
-  Map
+  Map,
+  Key
 } from "lucide-react";
 import Link from "next/link";
 
@@ -478,6 +479,17 @@ function CanvasInner({
           </button>
 
           <div className="h-4 w-[1px] bg-white/10" />
+
+          {/* Workflow Secrets Vault Link (Opens in New Tab) */}
+          <Link
+            href={`/workflow/${workflowId}/vault`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-xl border border-white/10 text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+            title="Open Workflow Vault in New Tab (TG_BOT_1, TG_BOT_2...)"
+          >
+            <Key className="h-4 w-4" />
+          </Link>
 
           {/* Toggle MiniMap button */}
           <button

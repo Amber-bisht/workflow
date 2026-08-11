@@ -6,6 +6,7 @@ import { TavilyService } from "./TavilyService";
 import { WebsiteMonitorService } from "./WebsiteMonitorService";
 import { CredentialService } from "./CredentialService";
 import { BillingService, CREDIT_COSTS } from "./BillingService";
+import { decryptKey } from "../utils/encryption";
 import { EventEmitter } from "events";
 
 export const workflowEvents = new EventEmitter();
@@ -187,8 +188,8 @@ export class WorkflowEngine {
               response: typeof responseBody === "string" ? responseBody : JSON.stringify(responseBody),
             };
 
-          // ── Telegram Send ───────────────────────────────────────────────
-          } else if (node.type === "TelegramSend") {
+          // ── Telegram Alert ───────────────────────────────────────────────
+          } else if (node.type === "Telegram" || node.type === "TelegramSend") {
             let messageText = node.data?.message || "";
 
             for (const edge of incomingEdges) {
@@ -198,16 +199,35 @@ export class WorkflowEngine {
               break; // use first upstream text
             }
 
-            // Resolve bot token from credential vault or direct config
             let botToken = node.data?.botToken || "";
-            if (node.data?.credentialId) {
-              const creds = await CredentialService.getDecrypted(resolvedUserId, node.data.credentialId);
-              botToken = creds.token || creds.botToken || "";
+            let chatId = node.data?.chatId || "";
+
+            // Check if node specifies a Workflow Secret Tag (e.g. TG_BOT_1, TG_BOT_2)
+            const secretTag = node.data?.secretTag || node.data?.credentialId;
+            if (secretTag) {
+              const sec = await prisma.workflowSecret.findUnique({
+                where: {
+                  workflowId_key: {
+                    workflowId,
+                    key: secretTag.toUpperCase(),
+                  },
+                },
+              });
+              if (sec) {
+                botToken = decryptKey(sec.encryptedVal);
+              } else if (node.data?.credentialId) {
+                const creds = await CredentialService.getDecrypted(resolvedUserId, node.data.credentialId);
+                botToken = creds.token || creds.botToken || "";
+                if (creds.chatId) chatId = creds.chatId;
+              }
             }
 
-            const chatId = node.data?.chatId || "";
-            if (!botToken) throw new Error("TelegramSend: Bot token is required (set in node config or Credential Vault)");
-            if (!chatId) throw new Error("TelegramSend: Chat ID is required");
+            // Fallback to platform environment defaults
+            if (!botToken) botToken = process.env.TELEGRAM_BOT_TOKEN || "";
+            if (!chatId) chatId = process.env.TELEGRAM_CHAT_ID || "";
+
+            if (!botToken) throw new Error("Telegram Alert: Bot Token is required (add in Workflow Secrets or Credentials Vault)");
+            if (!chatId) throw new Error("Telegram Alert: Chat ID is required");
 
             const result = await TelegramService.sendMessage(botToken, chatId, messageText);
             output = result;
@@ -223,17 +243,37 @@ export class WorkflowEngine {
               break;
             }
 
-            let apiKey = node.data?.apiKey || process.env.RESEND_API_KEY || "";
-            if (node.data?.credentialId) {
-              const creds = await CredentialService.getDecrypted(resolvedUserId, node.data.credentialId);
-              apiKey = creds.apiKey || "";
+            let apiKey = node.data?.apiKey || "";
+            let fromEmail = node.data?.from || "notifications@amberbisht.me";
+
+            // Check if node specifies a Workflow Secret Tag (e.g. RESEND_KEY)
+            const secretTag = node.data?.secretTag || node.data?.credentialId;
+            if (secretTag) {
+              const sec = await prisma.workflowSecret.findUnique({
+                where: {
+                  workflowId_key: {
+                    workflowId,
+                    key: secretTag.toUpperCase(),
+                  },
+                },
+              });
+              if (sec) {
+                apiKey = decryptKey(sec.encryptedVal);
+              } else if (node.data?.credentialId) {
+                const creds = await CredentialService.getDecrypted(resolvedUserId, node.data.credentialId);
+                apiKey = creds.apiKey || "";
+                if (creds.fromEmail) fromEmail = creds.fromEmail;
+              }
             }
 
-            if (!apiKey) throw new Error("ResendEmail: API key is required");
+            // Fallback to platform environment defaults
+            if (!apiKey) apiKey = process.env.RESEND_API_KEY || "";
+
+            if (!apiKey) throw new Error("ResendEmail: API key is required (add in Workflow Secrets or Credentials Vault)");
 
             const result = await ResendService.sendEmail(
               apiKey,
-              node.data?.from || "noreply@automation.amberbisht.me",
+              fromEmail,
               node.data?.to || "",
               node.data?.subject || "Workflow Notification",
               emailBody

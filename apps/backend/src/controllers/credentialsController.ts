@@ -1,35 +1,96 @@
 import { Hono } from "hono";
-import { CredentialService } from "../services/CredentialService";
+import { prisma } from "@nextflow/database";
+import { encryptKey, decryptKey } from "../utils/encryption";
 
 export const credentialsRouter = new Hono();
 
-// GET /api/credentials — list user's saved credentials (names only, no raw keys)
+// GET /api/credentials - List user's saved credentials (masked secrets)
 credentialsRouter.get("/", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "Unauthorized" }, 401);
+  try {
+    const userId = c.req.query("userId") || "default_user";
 
-  const creds = await CredentialService.listForUser(userId);
-  return c.json({ success: true, credentials: creds });
+    const credentials = await prisma.credential.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    const masked = credentials.map((cred) => {
+      let rawData: any = {};
+      try {
+        const decryptedStr = decryptKey(cred.data);
+        rawData = JSON.parse(decryptedStr);
+      } catch (err) {
+        rawData = {};
+      }
+
+      return {
+        id: cred.id,
+        name: cred.name,
+        type: cred.type,
+        updatedAt: cred.updatedAt,
+        metadata: {
+          botTokenMasked: rawData.botToken ? `${rawData.botToken.slice(0, 6)}...****` : undefined,
+          chatId: rawData.chatId || undefined,
+          resendApiKeyMasked: rawData.resendApiKey ? `${rawData.resendApiKey.slice(0, 6)}...****` : undefined,
+          fromEmail: rawData.fromEmail || undefined,
+        },
+      };
+    });
+
+    return c.json({ success: true, credentials: masked });
+  } catch (error: any) {
+    console.error("[CredentialsController] GET error:", error);
+    return c.json({ error: error.message || "Failed to fetch credentials" }, 500);
+  }
 });
 
-// POST /api/credentials — save a new credential
+// POST /api/credentials - Save or update a credential (encrypt with AES-256-GCM)
 credentialsRouter.post("/", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "Unauthorized" }, 401);
+  try {
+    const body = await c.req.json();
+    const { userId = "default_user", id, name, type, payload } = body;
 
-  const { name, type, data } = await c.req.json();
-  if (!name || !type || !data) return c.json({ error: "name, type, and data are required" }, 400);
+    if (!name || !type || !payload) {
+      return c.json({ error: "name, type, and payload are required" }, 400);
+    }
 
-  const cred = await CredentialService.create(userId, name, type, data);
-  return c.json({ success: true, credential: cred });
+    const encryptedData = encryptKey(JSON.stringify(payload));
+
+    if (id) {
+      const updated = await prisma.credential.update({
+        where: { id },
+        data: {
+          name,
+          type,
+          data: encryptedData,
+        },
+      });
+      return c.json({ success: true, credentialId: updated.id });
+    } else {
+      const created = await prisma.credential.create({
+        data: {
+          userId,
+          name,
+          type,
+          data: encryptedData,
+        },
+      });
+      return c.json({ success: true, credentialId: created.id });
+    }
+  } catch (error: any) {
+    console.error("[CredentialsController] POST error:", error);
+    return c.json({ error: error.message || "Failed to save credential" }, 500);
+  }
 });
 
-// DELETE /api/credentials/:id — delete a credential
+// DELETE /api/credentials/:id - Delete credential
 credentialsRouter.delete("/:id", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "Unauthorized" }, 401);
-
-  const id = c.req.param("id");
-  await CredentialService.delete(userId, id);
-  return c.json({ success: true });
+  try {
+    const id = c.req.param("id");
+    await prisma.credential.delete({ where: { id } });
+    return c.json({ success: true });
+  } catch (error: any) {
+    console.error("[CredentialsController] DELETE error:", error);
+    return c.json({ error: error.message || "Failed to delete credential" }, 500);
+  }
 });

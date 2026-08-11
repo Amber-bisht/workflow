@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Position, Handle } from "@xyflow/react";
 import { Send, X, Sparkles } from "lucide-react";
 import { useWorkflowStore } from "@/lib/store";
@@ -10,6 +11,8 @@ interface TelegramNodeProps {
   data: {
     message?: string;
     chatId?: string;
+    credentialId?: string;
+    secretTag?: string;
     outputResult?: string;
   };
   selected?: boolean;
@@ -21,7 +24,22 @@ export default function TelegramNode({ id, data, selected }: TelegramNodeProps) 
   const isRunning = runningNodeIds.includes(id);
   const message = data.message || "";
   const chatId = data.chatId || "";
+  const credentialId = data.credentialId || "";
   const outputResult = data.outputResult || "";
+
+  const [savedCredentials, setSavedCredentials] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/credentials?userId=default_user")
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.credentials)) {
+          const tgCreds = resData.credentials.filter((c: any) => c.type === "TELEGRAM");
+          setSavedCredentials(tgCreds);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div
@@ -64,20 +82,40 @@ export default function TelegramNode({ id, data, selected }: TelegramNodeProps) 
 
       {/* Inputs Stack */}
       <div className="flex flex-col border-b border-neutral-200/80">
+        {/* Credential Account Selector */}
+        <div className="py-2.5 px-4 border-b border-neutral-100 flex flex-col gap-1 bg-sky-50/20">
+          <label className="text-[10px] font-bold text-sky-700 uppercase tracking-wider block">
+            Target Bot Account
+          </label>
+          <select
+            value={credentialId}
+            onChange={(e) => updateNodeData(id, "credentialId", e.target.value)}
+            className="w-full bg-white border border-neutral-200 rounded px-2.5 py-1 text-xs text-neutral-800 focus:outline-none focus:border-sky-500 font-medium"
+          >
+            <option value="">Default Platform Bot (@NextFlowAlertsBot)</option>
+            {savedCredentials.map((cred) => (
+              <option key={cred.id} value={cred.id}>
+                🤖 {cred.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Chat ID Input */}
-        <div className="py-2 px-4 border-b border-neutral-100 flex items-center gap-2 bg-neutral-50/20">
-          <div className="flex-1">
-            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">
-              Telegram Chat ID (Optional)
-            </label>
-            <input
-              type="text"
-              value={chatId}
-              onChange={(e) => updateNodeData(id, "chatId", e.target.value)}
-              placeholder="Default Chat ID"
-              className="w-full bg-white border border-neutral-200 rounded px-2.5 py-1 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-sky-500"
-            />
-          </div>
+        <div className="py-2.5 px-4 border-b border-neutral-100 flex flex-col gap-1 bg-neutral-50/20">
+          <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider block">
+            Telegram Chat ID (Optional)
+          </label>
+          <input
+            type="text"
+            value={chatId}
+            onChange={(e) => updateNodeData(id, "chatId", e.target.value)}
+            placeholder="Default Chat ID (e.g. -100...)"
+            className="w-full bg-white border border-neutral-200 rounded px-2.5 py-1 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-sky-500"
+          />
+          <span className="text-[10px] text-neutral-400 leading-tight block mt-0.5">
+            💡 Add <strong className="text-sky-600 font-bold">@NextFlowAlertsBot</strong> to your chat or select your saved Bot in <strong className="text-sky-600 font-bold">Credentials Vault</strong>.
+          </span>
         </div>
 
         {/* Alert Message Input Port */}

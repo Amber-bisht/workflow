@@ -13,11 +13,12 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Key
 } from "lucide-react";
 
 interface AppSidebarProps {
-  activePath: "workflows" | "nodes" | "profile" | "billing";
+  activePath: "workflows" | "nodes" | "profile" | "billing" | "credentials";
   onNewWorkflow?: () => void;
 }
 
@@ -143,6 +144,18 @@ export default function AppSidebar({ activePath, onNewWorkflow }: AppSidebarProp
           >
             <CreditCard className={`w-4 h-4 shrink-0 ${activePath === "billing" ? "text-emerald-400" : "text-neutral-500"}`} />
             {!isCollapsed && <span>Billing & Plans</span>}
+          </Link>
+
+          {/* Nav item: Credentials Vault */}
+          <Link
+            href="/credentials"
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs font-semibold w-full cursor-pointer ${activePath === "credentials"
+                ? "bg-white/10 text-white border border-white/15"
+                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              } ${isCollapsed ? "justify-center px-0" : ""}`}
+          >
+            <Key className={`w-4 h-4 shrink-0 ${activePath === "credentials" ? "text-amber-400" : "text-neutral-500"}`} />
+            {!isCollapsed && <span>Credentials Vault</span>}
           </Link>
         </nav>
       </div>
