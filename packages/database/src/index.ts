@@ -30,11 +30,15 @@ if (!process.env.DATABASE_URL) {
   }
 }
 
-const connectionString =
+const connectionString = (
   process.env.DATABASE_URL ||
-  "postgresql://postgres:postgres@localhost:5432/nextflow?schema=public";
+  "postgresql://postgres:postgres@localhost:5432/nextflow?schema=public"
+).replace(/^["']|["']$/g, "").replace(/%22$/gi, "").trim();
 
-// Enable SSL for remote PostgreSQL hosts (e.g. Supabase, AWS RDS)
+if (connectionString) {
+  process.env.DATABASE_URL = connectionString;
+}
+
 const isRemote =
   connectionString.includes("supabase.co") ||
   connectionString.includes("supabase.com") ||
@@ -45,9 +49,6 @@ const isRemote =
 const pool = new pg.Pool({
   connectionString,
   ssl: isRemote ? { rejectUnauthorized: false } : undefined,
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000,
-  max: 10,
 });
 
 const adapter = new PrismaPg(pool);

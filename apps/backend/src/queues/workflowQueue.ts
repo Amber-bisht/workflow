@@ -7,10 +7,10 @@ let workflowQueue: Queue | null = null;
 let redisConnection: Redis | null = null;
 
 try {
-  const redisUrl = env.REDIS_URL;
-  const isTls = redisUrl.startsWith("rediss://") || redisUrl.includes("upstash.io");
+  const rawRedisUrl = (env.REDIS_URL || process.env.REDIS_URL || "").replace(/^["']|["']$/g, "").replace(/%22$/gi, "").trim();
+  const isTls = rawRedisUrl.startsWith("rediss://") || rawRedisUrl.includes("upstash.io");
 
-  redisConnection = new Redis(redisUrl, {
+  redisConnection = new Redis(rawRedisUrl, {
     maxRetriesPerRequest: null,
     enableOfflineQueue: false,
     tls: isTls ? { rejectUnauthorized: false } : undefined,
