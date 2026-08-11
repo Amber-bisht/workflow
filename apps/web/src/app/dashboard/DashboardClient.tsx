@@ -29,7 +29,7 @@ import {
   Calendar,
   ArrowRight
 } from "lucide-react";
-import { createWorkflow, deleteWorkflow, renameWorkflow, importWorkflow } from "../actions/workflow";
+import { createWorkflow, deleteWorkflow, renameWorkflow, importWorkflow, createExampleWorkflow } from "../actions/workflow";
 import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/AppHeader";
 
@@ -113,6 +113,18 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
   const [renameValue, setRenameValue] = useState("");
   const [renameDescValue, setRenameDescValue] = useState("");
 
+  const handleCreateExample = async () => {
+    setIsSubmitting(true);
+    try {
+      const flow = await createExampleWorkflow();
+      router.push(`/workflow/${flow.id}`);
+    } catch (err: any) {
+      alert("Failed to load example workflow: " + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -122,11 +134,11 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
       try {
         const layout = JSON.parse(event.target?.result as string);
         if (Array.isArray(layout.nodes) && Array.isArray(layout.edges)) {
-          const name = file.name.replace(/_layout\.json$/i, "").replace(/_/g, " ") || "Imported Workflow";
+          const name = layout.name || file.name.replace(/_layout\.json$/i, "").replace(/_/g, " ") || "Imported Workflow";
           const newFlow = await importWorkflow(name, layout.nodes, layout.edges);
           router.push(`/workflow/${newFlow.id}`);
         } else {
-          alert("Invalid layout file structure.");
+          alert("Invalid layout file structure. Ensure 'nodes' and 'edges' arrays are present.");
         }
       } catch (err: any) {
         alert("Failed to import workflow: " + (err.message || String(err)));
@@ -264,6 +276,31 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
               </button>
             </div>
           </AppHeader>
+
+          {/* Ready-to-Test Template Banner */}
+          <div className="w-full rounded-2xl border border-white/15 bg-[#121215] p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <Zap className="w-3 h-3 fill-current" />
+                <span>Ready-to-Test Template</span>
+              </div>
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                AI Web Research & Dual Alert Pipeline
+              </h2>
+              <p className="text-xs text-neutral-400 leading-normal">
+                Inputs → Web Search → LLM Engine → Telegram & Email. Fill Chat ID & Email to test live!
+              </p>
+            </div>
+
+            <button
+              onClick={handleCreateExample}
+              disabled={isSubmitting}
+              className="px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-xs transition-all shadow-md active:scale-95 shrink-0 cursor-pointer flex items-center gap-2"
+            >
+              <span>Load Pre-Wired Workflow</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           {/* Feature Banner Image */}
           <div className="w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-neutral-900/50 h-44 sm:h-56 md:h-64 relative">

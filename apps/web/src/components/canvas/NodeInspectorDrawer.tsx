@@ -10,6 +10,7 @@ import {
   Sliders, 
   Crop, 
   FileText,
+  Activity,
   Key,
   Trash2,
   Plus,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { useWorkflowStore } from "@/lib/store";
 import Link from "next/link";
+import { testTelegramConnection, getLatestTelegramChatId, testResendEmailConnection } from "@/app/actions/workflow";
 
 // Real Resend Mail Vector Logo
 function ResendMailLogo({ className = "w-5 h-5 text-rose-500" }: { className?: string }) {
@@ -54,6 +56,56 @@ export default function NodeInspectorDrawer() {
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [editNameValue, setEditNameValue] = useState("");
   const [copied, setCopied] = useState(false);
+  const [tgTestStatus, setTgTestStatus] = useState<{ loading: boolean; success?: boolean; message?: string } | null>(null);
+
+  const handleTestTelegram = async (currentChatId: string, currentSecretTag?: string) => {
+    if (!currentChatId || !currentChatId.trim()) {
+      setTgTestStatus({ loading: false, success: false, message: "Please enter a Telegram Chat ID first." });
+      return;
+    }
+    setTgTestStatus({ loading: true });
+    const res = await testTelegramConnection(currentChatId, currentSecretTag);
+    setTgTestStatus({
+      loading: false,
+      success: res.success,
+      message: res.success ? res.message : res.error,
+    });
+  };
+
+  const handleAutoDetectChatId = async (currentSecretTag?: string) => {
+    setTgTestStatus({ loading: true });
+    const res = await getLatestTelegramChatId(currentSecretTag);
+    if (res.success && res.chatId) {
+      if (node) updateNodeData(node.id, "chatId", res.chatId);
+      setTgTestStatus({
+        loading: false,
+        success: true,
+        message: `✅ Auto-detected Chat ID: ${res.chatId} (${res.chatTitle})`,
+      });
+    } else {
+      setTgTestStatus({
+        loading: false,
+        success: false,
+        message: res.error || "Could not auto-detect chat.",
+      });
+    }
+  };
+
+  const [emailTestStatus, setEmailTestStatus] = useState<{ loading: boolean; success?: boolean; message?: string } | null>(null);
+
+  const handleTestResendEmail = async (currentToEmail: string, currentSecretTag?: string) => {
+    if (!currentToEmail || !currentToEmail.trim()) {
+      setEmailTestStatus({ loading: false, success: false, message: "Please enter a Recipient Email address first." });
+      return;
+    }
+    setEmailTestStatus({ loading: true });
+    const res = await testResendEmailConnection(currentToEmail, currentSecretTag);
+    setEmailTestStatus({
+      loading: false,
+      success: res.success,
+      message: res.success ? res.message : res.error,
+    });
+  };
 
   useEffect(() => {
     // Fetch credentials
@@ -98,6 +150,11 @@ export default function NodeInspectorDrawer() {
   const systemPrompt = typeof data.systemPrompt === "string" ? data.systemPrompt : "";
   const prompt = typeof data.prompt === "string" ? data.prompt : "";
   const query = typeof data.query === "string" ? data.query : "";
+  const url = typeof data.url === "string" ? data.url : "";
+  const x = data.x !== undefined ? data.x : 0;
+  const y = data.y !== undefined ? data.y : 0;
+  const w = data.w !== undefined ? data.w : 100;
+  const h = data.h !== undefined ? data.h : 100;
   const fields = Array.isArray(data.fields) ? data.fields : [];
 
   const handleAddFieldSubmit = (e: React.FormEvent) => {
@@ -120,6 +177,7 @@ export default function NodeInspectorDrawer() {
       case "ResendEmail": return <ResendMailLogo className="h-5 w-5 text-rose-500" />;
       case "Gemini": case "OpenRouter": return <Bot className="h-5 w-5 text-purple-400" />;
       case "Tavily": case "TavilySearch": return <Globe className="h-5 w-5 text-emerald-400" />;
+      case "WebsiteMonitor": return <Activity className="h-5 w-5 text-emerald-400" />;
       case "RequestInputs": return <Sliders className="h-5 w-5 text-amber-400" />;
       case "CropImage": return <Crop className="h-5 w-5 text-indigo-400" />;
       case "Response": return <FileText className="h-5 w-5 text-blue-400" />;
@@ -130,9 +188,10 @@ export default function NodeInspectorDrawer() {
   const getNodeTitle = () => {
     switch (node.type) {
       case "Telegram": return "Telegram Bot Alert";
-      case "ResendEmail": return "Resend Email";
-      case "Gemini": case "OpenRouter": return "Gemini AI Engine";
-      case "Tavily": case "TavilySearch": return "Tavily Web Search";
+      case "ResendEmail": return "Send Email";
+      case "Gemini": case "OpenRouter": return "LLM Engine";
+      case "Tavily": case "TavilySearch": return "Web Search";
+      case "WebsiteMonitor": return "Website Monitor";
       case "RequestInputs": return "User Request Form";
       case "CropImage": return "Crop Image";
       case "Response": return "Workflow Response";
@@ -180,6 +239,92 @@ export default function NodeInspectorDrawer() {
 
         {/* Drawer Body - Pure Black */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-black">
+
+          {/* Website Monitor Form */}
+          {node.type === "WebsiteMonitor" && (
+            <div className="space-y-5">
+              <div>
+                <label className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-1.5">
+                  Target Website URL
+                </label>
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => updateNodeData(node.id, "url", e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white placeholder-neutral-500 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              {data.outputStatus && (
+                <div className="p-3.5 bg-[#121215] rounded-xl border border-neutral-800 font-mono text-xs space-y-1">
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
+                    Latency & Availability Result
+                  </span>
+                  <div className="text-emerald-400 font-bold">{String(data.outputStatus)}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Crop Image Form */}
+          {node.type === "CropImage" && (
+            <div className="space-y-5">
+              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">
+                Image Crop Dimensions (%)
+              </span>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
+                    X Position (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={x}
+                    onChange={(e) => updateNodeData(node.id, "x", Number(e.target.value))}
+                    className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
+                    Y Position (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={y}
+                    onChange={(e) => updateNodeData(node.id, "y", Number(e.target.value))}
+                    className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
+                    Width (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={w}
+                    onChange={(e) => updateNodeData(node.id, "w", Number(e.target.value))}
+                    className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
+                    Height (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={h}
+                    onChange={(e) => updateNodeData(node.id, "h", Number(e.target.value))}
+                    className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* RequestInputs (User Request Form) */}
           {node.type === "RequestInputs" && (
@@ -334,7 +479,7 @@ export default function NodeInspectorDrawer() {
                   }}
                   className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-sky-500 font-medium"
                 >
-                  <option value="">Default Platform Bot (@NextFlowAlertsBot)</option>
+                  <option value="">Default Platform Bot (@asprin_dev_bot)</option>
                   {workflowSecrets.length > 0 && (
                     <optgroup label="Workflow Secrets">
                       {workflowSecrets.map((s) => (
@@ -353,19 +498,55 @@ export default function NodeInspectorDrawer() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider block mb-1.5">
-                  Telegram Chat ID
+                <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider block mb-1.5 flex items-center justify-between">
+                  <span>Telegram Chat ID</span>
+                  <span className="text-[10px] text-neutral-400 font-mono">e.g. -100123456789</span>
                 </label>
-                <input
-                  type="text"
-                  value={chatId}
-                  onChange={(e) => updateNodeData(node.id, "chatId", e.target.value)}
-                  placeholder="Enter Chat ID (e.g. -100123456789)"
-                  className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white placeholder-neutral-500 font-mono focus:outline-none focus:border-sky-500"
-                />
-                <p className="text-[11px] text-neutral-400 mt-1.5 leading-snug">
-                  💡 Add <span className="text-sky-400 font-bold">@NextFlowAlertsBot</span> to your chat or manage keys in <Link href={`/workflow/${workflowId}/vault`} target="_blank" className="text-sky-400 font-semibold hover:underline inline-flex items-center gap-1"><span>Vault Page</span> <Key className="w-3 h-3" /></Link>.
-                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={chatId}
+                      onChange={(e) => updateNodeData(node.id, "chatId", e.target.value)}
+                      placeholder="Enter Chat ID..."
+                      className="flex-1 bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white placeholder-neutral-500 font-mono focus:outline-none focus:border-sky-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleAutoDetectChatId(credentialId)}
+                      disabled={tgTestStatus?.loading}
+                      className="px-2.5 py-2.5 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 font-bold text-xs rounded-lg transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0"
+                      title="Auto-detect Chat ID from latest message sent to @asprin_dev_bot"
+                    >
+                      <span>🔍 Detect</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleTestTelegram(chatId, credentialId)}
+                      disabled={tgTestStatus?.loading || !chatId}
+                      className="px-3 py-2.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 shrink-0"
+                      title="Send Hello World test ping to verify connection"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{tgTestStatus?.loading ? "Testing..." : "Test Ping"}</span>
+                    </button>
+                  </div>
+
+                  {tgTestStatus && !tgTestStatus.loading && (
+                    <div className={`p-2.5 rounded-lg border text-xs font-medium ${
+                      tgTestStatus.success 
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                        : "bg-red-500/10 border-red-500/30 text-red-400"
+                    }`}>
+                      {tgTestStatus.message}
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-neutral-400 leading-snug">
+                    💡 Add <span className="text-sky-400 font-bold">@asprin_dev_bot</span> to your group or channel first, then enter Chat ID.
+                  </p>
+                </div>
               </div>
 
               <div>
@@ -399,7 +580,7 @@ export default function NodeInspectorDrawer() {
                   }}
                   className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 font-medium"
                 >
-                  <option value="">Default NextFlow Service (notifications@amberbisht.me)</option>
+                  <option value="">Default NextFlow Service (System Environment Key)</option>
                   {workflowSecrets.length > 0 && (
                     <optgroup label="Workflow Secrets">
                       {workflowSecrets.map((s) => (
@@ -418,16 +599,41 @@ export default function NodeInspectorDrawer() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider block mb-1.5">
-                  Recipient Email (To)
+                <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider block mb-1.5 flex items-center justify-between">
+                  <span>Recipient Email (To)</span>
+                  <span className="text-[10px] text-neutral-400 font-mono">e.g. bishtamber0@gmail.com</span>
                 </label>
-                <input
-                  type="email"
-                  value={to}
-                  onChange={(e) => updateNodeData(node.id, "to", e.target.value)}
-                  placeholder="user@example.com"
-                  className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white placeholder-neutral-500 font-mono focus:outline-none focus:border-rose-500"
-                />
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="email"
+                      value={to}
+                      onChange={(e) => updateNodeData(node.id, "to", e.target.value)}
+                      placeholder="user@example.com"
+                      className="flex-1 bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white placeholder-neutral-500 font-mono focus:outline-none focus:border-rose-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleTestResendEmail(to, credentialId)}
+                      disabled={emailTestStatus?.loading || !to}
+                      className="px-3 py-2.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 shrink-0"
+                      title="Send Hello World test email to verify connection"
+                    >
+                      <ResendMailLogo className="w-3.5 h-3.5 text-rose-400" />
+                      <span>{emailTestStatus?.loading ? "Testing..." : "Test Ping"}</span>
+                    </button>
+                  </div>
+
+                  {emailTestStatus && !emailTestStatus.loading && (
+                    <div className={`p-2.5 rounded-lg border text-xs font-medium ${
+                      emailTestStatus.success 
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                        : "bg-red-500/10 border-red-500/30 text-red-400"
+                    }`}>
+                      {emailTestStatus.message}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -463,17 +669,25 @@ export default function NodeInspectorDrawer() {
             <div className="space-y-5">
               <div>
                 <label className="text-[10px] font-bold text-purple-400 uppercase tracking-wider block mb-1.5">
-                  Select Model
+                  Select Free AI Model
                 </label>
                 <select
                   value={model}
                   onChange={(e) => updateNodeData(node.id, "model", e.target.value)}
                   className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 font-medium"
                 >
-                  <option value="gemini-2.5-flash">gemini-2.5-flash (Fast & Multimodal)</option>
-                  <option value="gemini-2.5-pro">gemini-2.5-pro (Reasoning & Complex Tasks)</option>
-                  <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
+                  <option value="openrouter/free">openrouter/free (Auto Best Free Router - Default)</option>
+                  <option value="google/gemma-4-31b-it:free">google/gemma-4-31b-it:free (Google Gemma 4 31B Free)</option>
+                  <option value="google/gemma-4-26b-a4b-it:free">google/gemma-4-26b-a4b-it:free (Google Gemma 4 26B Free)</option>
+                  <option value="nvidia/nemotron-nano-12b-v2-vl:free">nvidia/nemotron-nano-12b-v2-vl:free (NVIDIA Vision Multimodal Free)</option>
+                  <option value="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free">nvidia/nemotron-3-nano-omni:free (NVIDIA Omni Reasoning Free)</option>
+                  <option value="openai/gpt-oss-20b:free">openai/gpt-oss-20b:free (OpenAI GPT OSS 20B Free)</option>
+                  <option value="cohere/north-mini-code:free">cohere/north-mini-code:free (Cohere Code Free)</option>
+                  <option value="inclusionai/ling-3.0-tiny:free">inclusionai/ling-3.0-tiny:free (InclusionAI Free)</option>
                 </select>
+                <p className="text-[11px] text-neutral-400 mt-1.5 leading-snug">
+                  ✨ 100% Free models pre-configured with maximum daily credits.
+                </p>
               </div>
 
               <div>

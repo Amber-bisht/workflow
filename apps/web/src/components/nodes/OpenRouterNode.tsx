@@ -21,7 +21,7 @@ export default function OpenRouterNode({ id, data, selected }: OpenRouterNodePro
   const { runningNodeIds, setSelectedNodeId } = useWorkflowStore();
 
   const isRunning = runningNodeIds.includes(id);
-  const model = data.model || "gemini-2.5-flash";
+  const model = data.model || "google/gemini-2.0-flash-001";
 
   return (
     <div 
@@ -58,7 +58,7 @@ export default function OpenRouterNode({ id, data, selected }: OpenRouterNodePro
 
       <div className="mt-2 text-center max-w-[140px]">
         <h4 className="font-bold text-neutral-900 text-xs tracking-tight truncate group-hover:text-purple-600 transition-colors">
-          Gemini AI Engine
+          LLM Engine
         </h4>
         <span className="text-[10px] text-neutral-700 font-mono font-semibold block truncate">
           {model.split("/").pop()}

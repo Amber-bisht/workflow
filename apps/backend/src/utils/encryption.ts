@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 // Default secure 256-bit encryption secret if ENCRYPTION_SECRET is not in env
-const RAW_SECRET = process.env.ENCRYPTION_SECRET || "e7f9a8b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9";
+const RAW_SECRET = process.env.ENCRYPTION_SECRET || "";
 
 // Derive fixed 32-byte key buffer using SHA-256
 const ENCRYPTION_KEY = crypto.createHash("sha256").update(RAW_SECRET).digest();

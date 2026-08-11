@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import {
   CheckCircle2,
-  Menu,
-  X,
   ArrowRight,
   Bot,
   Sparkles,
@@ -22,45 +20,33 @@ import AuthModal from "@/components/AuthModal";
 
 export default function KreaExactLandingPage() {
   const { data: session, status } = useSession();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Showcase Cards — real workflow examples
+  // Showcase Cards — real local workflow screenshots
   const showcaseCards = [
     {
       title: "AI Research Pipeline",
-      prompt: "“Search web → summarise with GPT-4o → Telegram alert”",
-      image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=80&auto=format&fit=crop",
-      badge: "Workflow",
+      prompt: "Search web → summarise with GPT-4o → Telegram alert",
+      image: "/web+gpt+tg.png",
       action: "Build this",
     },
     {
-      title: "Smart Website Monitor",
-      prompt: "“Monitor uptime → detect change → notify on failure”",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80&auto=format&fit=crop",
-      badge: "Monitoring",
+      title: "Website Monitor & Alert",
+      prompt: "Monitor uptime → detect change → notify on failure",
+      image: "/up+change+notify.png",
       action: "Try monitor",
     },
     {
-      title: "Image Crop & CDN Upload",
-      prompt: "“Upload → AI crop → ImageKit CDN store”",
-      image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=600&q=80&auto=format&fit=crop",
-      badge: "Vision",
+      title: "Web Research → Email Report",
+      prompt: "Trigger web search → LLM summarise → send email report",
+      image: "/web+trigger+email.png",
       action: "Build pipeline",
     },
     {
-      title: "LLM Email Responder",
-      prompt: "“Trigger → OpenRouter LLM → auto-reply via Resend”",
-      image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80&auto=format&fit=crop",
-      badge: "Automation",
-      action: "Create workflow",
-    },
-    {
-      title: "Multi-Model AI Chain",
-      prompt: "“Input → Claude analysis → Gemini review → output”",
-      image: "https://images.unsplash.com/photo-1686191128892-3b37add4c844?w=600&q=80&auto=format&fit=crop",
-      badge: "AI Chain",
-      action: "Start building",
+      title: "AES-128 Encrypted Vault",
+      prompt: "Store secrets → AES-128 encrypt → secure workflow execution",
+      image: "/aes128.png",
+      action: "Explore security",
     },
   ];
 
@@ -70,12 +56,12 @@ export default function KreaExactLandingPage() {
       {/* Auth Modal Overlay */}
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
-      {/* ── Fixed Blur Navigation Header (CLEAN BRAND ONLY) ────────────────────── */}
+      {/* ── Fixed Navigation Header ──────────────────────────────────────── */}
       <div className="fixed top-0 left-0 w-full z-40">
         <header className="relative w-full mx-auto px-4 sm:px-6 lg:px-12 py-4 border-b border-white/15 backdrop-blur-xl bg-black/70 transition-all duration-300">
           <div className="flex items-center justify-between w-full max-w-7xl mx-auto">
 
-            {/* App Name Brand Logo */}
+            {/* Brand Logo */}
             <Link href="/" aria-label="Return to home" className="flex items-center gap-3">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                 <rect x="2" y="3" width="5" height="18" rx="2.5" />
@@ -88,13 +74,12 @@ export default function KreaExactLandingPage() {
               </span>
             </Link>
 
-            {/* Header Action Buttons */}
+            {/* Header Actions */}
             <div className="flex items-center gap-3">
               {status === "authenticated" ? (
                 <Link
                   href="/dashboard"
                   className="inline-flex items-center justify-center h-[36px] px-5 text-xs sm:text-sm font-semibold text-black bg-white rounded-full hover:bg-neutral-200 transition-all active:scale-95 text-nowrap cursor-pointer shadow-md"
-                  style={{ fontWeight: 450 }}
                 >
                   View Dashboard
                 </Link>
@@ -103,14 +88,12 @@ export default function KreaExactLandingPage() {
                   <button
                     onClick={() => setIsAuthModalOpen(true)}
                     className="inline-flex items-center justify-center h-[36px] px-5 text-xs sm:text-sm font-semibold text-black bg-white rounded-full hover:bg-neutral-200 transition-all active:scale-95 text-nowrap cursor-pointer shadow-md"
-                    style={{ fontWeight: 450 }}
                   >
                     Sign up for free
                   </button>
                   <button
                     onClick={() => setIsAuthModalOpen(true)}
                     className="inline-flex items-center justify-center h-[36px] px-5 text-xs sm:text-sm font-semibold text-white bg-[#262626] rounded-full hover:bg-neutral-800 transition-all active:scale-95 text-nowrap cursor-pointer"
-                    style={{ fontWeight: 450 }}
                   >
                     Log in
                   </button>
@@ -122,7 +105,7 @@ export default function KreaExactLandingPage() {
         </header>
       </div>
 
-      {/* ── Hero Section (GRAPHICS & ELEVATED TEXT POSITION) ──────────────────── */}
+      {/* ── Hero Section ─────────────────────────────────────────────────── */}
       <div data-hero-root="true" className="hero-section">
         <div className="relative h-[69px] z-10">
           <div className="absolute bg-black inset-0" />
@@ -136,10 +119,10 @@ export default function KreaExactLandingPage() {
             backgroundColor: "#05080d"
           }}
         >
-          {/* Hero Monitor Image */}
+          {/* Hero Image */}
           <img
-            src="/assets/hero-monitor.png"
-            alt="automation.amberbisht.me Hero Monitor"
+            src="/hero.png"
+            alt="NextFlow AI Workflow Canvas"
             className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none select-none"
           />
 
@@ -153,11 +136,11 @@ export default function KreaExactLandingPage() {
             style={{ background: "radial-gradient(ellipse 80% 45% at 50% 24%, rgba(18,54,86,0.42) 0%, rgba(0,0,0,0) 70%)" }}
           />
 
-          {/* Hero Content - Shifted UP for perfect visual alignment */}
+          {/* Hero Content */}
           <div className="relative z-20 mx-auto flex flex-col items-center max-w-[980px] -translate-y-2 sm:-translate-y-4">
             <h1
               aria-label="NextFlow — Build AI workflows visually. Run them anywhere."
-              className="text-[#f5f5f5] text-center max-w-[960px] margin-0"
+              className="text-[#f5f5f5] text-center max-w-[960px]"
               style={{
                 fontSize: "clamp(32px, 5.5vw, 56px)",
                 lineHeight: "1.05",
@@ -204,7 +187,7 @@ export default function KreaExactLandingPage() {
         </section>
       </div>
 
-      {/* ── Section 1: Showcase Cards (Horizontal Grid with Image Animations) ───── */}
+      {/* ── Section 1: Showcase Cards ──────────────────────────────────────── */}
       <section className="py-20 bg-white text-black">
         <div className="max-w-[1400px] mx-auto px-6 overflow-hidden">
           <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-none">
@@ -219,7 +202,7 @@ export default function KreaExactLandingPage() {
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
 
-                <div className="relative bg-[linear-gradient(to_top,rgba(0,0,0,0.78)_0%,rgba(0,0,0,0)_58%)] flex flex-col h-full w-full z-20 p-6 sm:p-8 justify-between">
+                <div className="relative bg-[linear-gradient(to_top,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0)_55%)] flex flex-col h-full w-full z-20 p-6 sm:p-8 justify-between">
                   <div>
                     <CheckCircle2 className="w-6 h-6 text-white" />
                   </div>
@@ -229,8 +212,8 @@ export default function KreaExactLandingPage() {
                       <div className="text-white/60 text-xs font-medium tracking-[1.2px] uppercase pb-2">
                         PROMPT
                       </div>
-                      <p className="text-white text-base sm:text-2xl font-medium tracking-tight leading-snug">
-                        {card.prompt}
+                      <p className="text-white text-base sm:text-xl font-medium tracking-tight leading-snug">
+                        &ldquo;{card.prompt}&rdquo;
                       </p>
                     </div>
 
@@ -250,7 +233,7 @@ export default function KreaExactLandingPage() {
         </div>
       </section>
 
-      {/* ── Section 2: Node Badges with Tech Icons ── */}
+      {/* ── Section 2: Node Badges ─────────────────────────────────────────── */}
       <section className="py-20 bg-neutral-950 text-white border-t border-neutral-900">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <span className="text-xs font-bold font-mono text-neutral-500 uppercase tracking-widest">
@@ -284,10 +267,10 @@ export default function KreaExactLandingPage() {
         </div>
       </section>
 
-      {/* ── Section 3: High-Impact Feature Banners ─────────────────────────────── */}
+      {/* ── Section 3: Feature Banners ─────────────────────────────────────── */}
       <section className="py-24 bg-black text-white px-6 space-y-28 max-w-[1300px] mx-auto">
 
-        {/* Feature Banner 1: Visual Node Canvas */}
+        {/* Feature 1: Build logic with nodes */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h2 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.1]">
@@ -307,30 +290,23 @@ export default function KreaExactLandingPage() {
             </div>
           </div>
 
-          <div className="relative rounded-[32px] overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl group">
+          <div className="bg-black">
             <img
-              src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=900&q=80&auto=format&fit=crop"
+              src="/example.png"
               alt="Visual workflow node canvas"
-              className="w-full h-[420px] object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              className="w-full object-contain"
             />
           </div>
         </div>
 
-        {/* Feature Banner 2: Multi-Model AI */}
+        {/* Feature 2: Every frontier model */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="relative rounded-[32px] overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl group order-2 lg:order-1">
-            <div className="grid grid-cols-2 h-[420px]">
-              <img
-                src="https://images.unsplash.com/photo-1655720828018-edd2daec9349?w=600&q=80&auto=format&fit=crop"
-                alt="AI brain visualization"
-                className="w-full h-full object-cover border-r border-white/10 group-hover:scale-105 transition-transform duration-700"
-              />
-              <img
-                src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&q=80&auto=format&fit=crop"
-                alt="Neural network connections"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-            </div>
+          <div className="bg-black order-2 lg:order-1">
+            <img
+              src="/apirouter.png"
+              alt="Multi-model AI router"
+              className="w-full object-contain"
+            />
           </div>
 
           <div className="space-y-6 order-1 lg:order-2">
@@ -352,7 +328,7 @@ export default function KreaExactLandingPage() {
           </div>
         </div>
 
-        {/* Feature Banner 3: Monitoring & Alerts */}
+        {/* Feature 3: Watch the web */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h2 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.1]">
@@ -372,19 +348,21 @@ export default function KreaExactLandingPage() {
             </div>
           </div>
 
-          <div className="relative rounded-[32px] overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl group">
+          <div className="bg-black">
             <img
-              src="https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=900&q=80&auto=format&fit=crop"
-              alt="Monitoring dashboard"
-              className="w-full h-[420px] object-cover group-hover:scale-105 transition-transform duration-700"
+              src="/indian.png"
+              alt="Website monitoring dashboard"
+              className="w-full object-contain"
             />
           </div>
         </div>
 
       </section>
 
-      {/* ── Section 4: Footer ─────────────────────────────────────────────────── */}
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
+
       <footer className="border-t border-neutral-900 py-16 px-6 bg-black text-neutral-400 text-sm">
+
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           <div className="space-y-4 md:col-span-2">
             <div className="flex items-center gap-2.5">
@@ -423,8 +401,7 @@ export default function KreaExactLandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto pt-8 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
-          <div>© {new Date().getFullYear()} automation.amberbisht.me
-            All rights reserved.</div>
+          <div>© {new Date().getFullYear()} automation.amberbisht.me. All rights reserved.</div>
           <div className="flex gap-6">
             <span className="hover:text-neutral-400 cursor-pointer">Terms of Service</span>
             <span className="hover:text-neutral-400 cursor-pointer">Privacy Policy</span>

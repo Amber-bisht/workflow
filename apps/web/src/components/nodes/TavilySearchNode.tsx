@@ -54,7 +54,7 @@ export default function TavilySearchNode({ id, data, selected }: TavilySearchNod
 
       <div className="mt-2 text-center max-w-[140px]">
         <h4 className="font-bold text-neutral-900 text-xs tracking-tight truncate group-hover:text-emerald-600 transition-colors">
-          Tavily Web Search
+          Web Search
         </h4>
         <span className="text-[10px] text-neutral-700 font-mono font-semibold block truncate">
           {query ? query : "Live Search"}

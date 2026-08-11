@@ -92,3 +92,29 @@ workflowRouter.get("/stream/:runId", (c) => {
     });
   });
 });
+
+// GET /api/workflow/run/:id - Fetch run status and node executions
+workflowRouter.get("/run/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const run = await prisma.workflowRun.findUnique({
+      where: { id },
+      include: {
+        nodeRuns: {
+          orderBy: {
+            startedAt: "asc",
+          },
+        },
+      },
+    });
+
+    if (!run) {
+      return c.json({ error: "Run not found" }, 404);
+    }
+
+    return c.json(run);
+  } catch (error: any) {
+    return c.json({ error: error.message || "Internal Server Error" }, 500);
+  }
+});
+

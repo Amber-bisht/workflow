@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@nextflow/database";
 
 export async function GET(
@@ -7,20 +6,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
 
-    const run = await prisma.workflowRun.findFirst({
-      where: {
-        id,
-        workflow: {
-          userId: session.user.id,
-        },
-      },
+    const run = await prisma.workflowRun.findUnique({
+      where: { id },
       include: {
         nodeRuns: {
           orderBy: {

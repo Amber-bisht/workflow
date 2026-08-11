@@ -23,7 +23,7 @@ export class BillingService {
     let record = await prisma.userCredits.findUnique({ where: { userId } });
 
     if (!record) {
-      // First-time user: provision free credits
+      // First-time user: provision free credits (100)
       record = await prisma.userCredits.create({
         data: {
           userId,
@@ -36,7 +36,7 @@ export class BillingService {
         data: { userId, amount: 100, reason: "FREE_GRANT" },
       });
     } else {
-      // Check if monthly cycle has expired → reset free credits
+      // Check if monthly cycle has expired → reset free credits to 100
       const cycleStart = new Date(record.cycleStartDate);
       const now = new Date();
       const daysDiff = (now.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24);
@@ -75,12 +75,28 @@ export class BillingService {
     const cost = CREDIT_COSTS[nodeType] ?? 1;
     if (cost === 0) return; // free node
 
-    const record = await prisma.userCredits.findUnique({ where: { userId } });
-    const total = (record?.freeCredits ?? 0) + (record?.paidCredits ?? 0);
+    let record = await prisma.userCredits.findUnique({ where: { userId } });
+
+    if (!record) {
+      record = await prisma.userCredits.create({
+        data: {
+          userId,
+          freeCredits: 100,
+          paidCredits: 0,
+          cycleStartDate: new Date(),
+        },
+      });
+      await prisma.creditTransaction.create({
+        data: { userId, amount: 100, reason: "FREE_GRANT" },
+      });
+    }
+
+    const total = record.freeCredits + record.paidCredits;
 
     if (total < cost) {
+      const resetDate = new Date(record.cycleStartDate.getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString();
       throw new Error(
-        `Insufficient credits. Need ${cost} credits for ${nodeType} node but have ${total}. Top up at automation.amberbisht.me/dashboard/billing`
+        `Insufficient credits. Required: ${cost} credits for ${nodeType} | Left: ${total} credits | Next Free Reset: ${resetDate}`
       );
     }
 

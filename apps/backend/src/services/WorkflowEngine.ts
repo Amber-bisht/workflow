@@ -99,6 +99,8 @@ export class WorkflowEngine {
         }
       });
 
+      let hasNodeErrors = false;
+
       // 3. Execute nodes in order
       for (const nodeId of nodesToRun) {
         const node = nodes.find((n: any) => n.id === nodeId);
@@ -139,11 +141,13 @@ export class WorkflowEngine {
               else promptText += `\n${this.resolveText(src, edge)}`;
             }
 
+            const selectedModel = node.data?.model || "openrouter/free";
+
             const llmResponse = await OpenRouterService.generateContent({
               prompt: promptText.trim(),
               systemInstruction,
               images,
-              model: "openai/gpt-4o",
+              model: selectedModel,
               temperature: node.data?.temperature ?? 0.7,
             });
 
@@ -226,7 +230,7 @@ export class WorkflowEngine {
             if (!botToken) botToken = process.env.TELEGRAM_BOT_TOKEN || "";
             if (!chatId) chatId = process.env.TELEGRAM_CHAT_ID || "";
 
-            if (!botToken) throw new Error("Telegram Alert: Bot Token is required (add in Workflow Secrets or Credentials Vault)");
+            if (!botToken) throw new Error("Telegram Alert: Bot Token is required");
             if (!chatId) throw new Error("Telegram Alert: Chat ID is required");
 
             const result = await TelegramService.sendMessage(botToken, chatId, messageText);
@@ -244,7 +248,7 @@ export class WorkflowEngine {
             }
 
             let apiKey = node.data?.apiKey || "";
-            let fromEmail = node.data?.from || "notifications@amberbisht.me";
+            let fromEmail = node.data?.from || process.env.RESEND_FROM_EMAIL || "notifications@amberbisht.me";
 
             // Check if node specifies a Workflow Secret Tag (e.g. RESEND_KEY)
             const secretTag = node.data?.secretTag || node.data?.credentialId;
@@ -269,7 +273,7 @@ export class WorkflowEngine {
             // Fallback to platform environment defaults
             if (!apiKey) apiKey = process.env.RESEND_API_KEY || "";
 
-            if (!apiKey) throw new Error("ResendEmail: API key is required (add in Workflow Secrets or Credentials Vault)");
+            if (!apiKey) throw new Error("ResendEmail: API key is required");
 
             const result = await ResendService.sendEmail(
               apiKey,
@@ -306,7 +310,7 @@ export class WorkflowEngine {
               node.data?.maxResults ?? 5,
               node.data?.searchDepth ?? "basic"
             );
-            output = { ...result, response: result.answer || result.results.map(r => r.content).join("\n\n") };
+            output = result;
 
           // ── Website Monitor ─────────────────────────────────────────────
           } else if (node.type === "WebsiteMonitor") {
@@ -348,6 +352,7 @@ export class WorkflowEngine {
 
         } catch (nodeError: any) {
           console.error(`[WorkflowEngine] Error in node ${nodeId}:`, nodeError);
+          hasNodeErrors = true;
           const nodeDuration = (Date.now() - nodeRunStart) / 1000;
 
           await prisma.nodeRun.update({
@@ -358,8 +363,6 @@ export class WorkflowEngine {
           workflowEvents.emit("nodeStatus", {
             runId: workflowRunId, nodeId, status: "FAILED", error: nodeError.message, timestamp: new Date().toISOString(),
           });
-
-          throw nodeError;
         }
       }
 
@@ -377,11 +380,12 @@ export class WorkflowEngine {
       }
 
       const totalDuration = (Date.now() - startOverall) / 1000;
+      const finalRunStatus = hasNodeErrors ? "FAILED" : "SUCCESS";
       await prisma.workflowRun.update({
         where: { id: workflowRunId },
-        data: { status: "SUCCESS", duration: totalDuration },
+        data: { status: finalRunStatus, duration: totalDuration },
       });
-      workflowEvents.emit("status", { runId: workflowRunId, status: "SUCCESS", timestamp: new Date().toISOString() });
+      workflowEvents.emit("status", { runId: workflowRunId, status: finalRunStatus, timestamp: new Date().toISOString() });
 
     } catch (overallError: any) {
       console.error(`[WorkflowEngine] Run ${workflowRunId} failed:`, overallError);

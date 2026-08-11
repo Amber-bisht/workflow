@@ -10,6 +10,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env.DATABASE_URL || "postgresql://postgres:uC5uqkjsfftfLbj0@db.hkvibcdzxzcdcnksrtro.supabase.co:5432/postgres",
+    url: process.env.DATABASE_URL || "",
   },
 });

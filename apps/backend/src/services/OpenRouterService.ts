@@ -78,6 +78,13 @@ export class OpenRouterService {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[OpenRouterService] Error ${response.status}:`, errorText);
+
+      // Auto-fallback to openrouter/free if requested model is unavailable or 404
+      if (model !== "openrouter/free" && (response.status === 404 || errorText.includes("No endpoints found"))) {
+        console.warn(`[OpenRouterService] Model ${model} not available on OpenRouter, retrying with openrouter/free...`);
+        return this.generateContent({ ...payload, model: "openrouter/free" });
+      }
+
       throw new Error(`OpenRouter API call failed (${response.status}): ${errorText}`);
     }
 

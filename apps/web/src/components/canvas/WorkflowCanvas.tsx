@@ -36,6 +36,8 @@ import {
   Move,
   Map,
   Key,
+  Coins,
+  X,
   LayoutGrid
 } from "lucide-react";
 import Link from "next/link";
@@ -45,7 +47,7 @@ import { nodeTypes } from "../nodes";
 import NodePicker from "./NodePicker";
 import HistorySidebar from "./HistorySidebar";
 import NodeInspectorDrawer from "./NodeInspectorDrawer";
-import { updateWorkflow } from "@/app/actions/workflow";
+import { updateWorkflow, getUserCredits } from "@/app/actions/workflow";
 import type { Connection } from "@xyflow/react";
 
 // ── Connection type helpers ───────────────────────────────────────────────────
@@ -251,8 +253,41 @@ function CanvasInner({
     return () => clearInterval(pollInterval);
   }, [activeRunId, setActiveRunId, setRunStatus, setNodes, setRunningNodes]);
 
+  const [userCredits, setUserCredits] = useState<{ freeCredits: number; paidCredits: number; total: number; resetDate: string } | null>(null);
+  const [isRunModalOpen, setIsRunModalOpen] = useState(false);
+
+  // Fetch live credit balance
+  const fetchCredits = async () => {
+    try {
+      const data = await getUserCredits();
+      setUserCredits(data);
+    } catch (e) {
+      console.error("Failed to fetch user credits:", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchCredits();
+  }, []);
+
+  // Calculate total credit cost of canvas graph
+  const calculateTotalCost = () => {
+    const costs: Record<string, number> = {
+      LLM: 5, OpenRouter: 5, Gemini: 5,
+      Telegram: 1, TelegramSend: 1, ResendEmail: 1, HTTPRequest: 1,
+      WebsiteMonitor: 2, TavilySearch: 3, RequestInputs: 0, Response: 0,
+    };
+    return nodes.reduce((acc, n) => acc + (costs[n.type || ""] ?? 1), 0);
+  };
+
+  const openRunModal = () => {
+    fetchCredits();
+    setIsRunModalOpen(true);
+  };
+
   // 4. Trigger Executions
-  const handleRun = async () => {
+  const executeWorkflowRun = async () => {
+    setIsRunModalOpen(false);
     setIsStartingRun(true);
     setRunStatus("RUNNING");
 
@@ -268,8 +303,8 @@ function CanvasInner({
       const data = await res.json();
       if (data.success && data.runId) {
         setActiveRunId(data.runId);
+        fetchCredits();
         
-        // Add draft pending run to history immediately with all nodes visible
         const mockRun = {
           id: data.runId,
           status: "PENDING",
@@ -476,17 +511,41 @@ function CanvasInner({
         <div className="bg-[#1a1b24] border border-white/15 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-2xl text-white pointer-events-auto">
           {getStatusIndicator()}
 
-          {/* Run Execution */}
+          {/* Run Execution Trigger */}
           <button
-            onClick={handleRun}
+            onClick={openRunModal}
             disabled={isStartingRun}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-white hover:bg-neutral-200 disabled:bg-neutral-800 disabled:opacity-50 text-black rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-white hover:bg-neutral-200 disabled:bg-neutral-800 disabled:opacity-50 text-black rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer active:scale-95"
           >
             <Play className="h-3.5 w-3.5 fill-current text-black" />
             Run Flow
           </button>
 
           <div className="h-4 w-[1px] bg-white/10" />
+
+          {/* Export JSON Layout Button */}
+          <button
+            onClick={() => {
+              const exportData = {
+                name: initialName,
+                exportedAt: new Date().toISOString(),
+                nodes,
+                edges,
+              };
+              const jsonString = JSON.stringify(exportData, null, 2);
+              const blob = new Blob([jsonString], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `${initialName.replace(/[^a-z0-9_-]/gi, "_")}_layout.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="p-2 rounded-xl border border-white/10 text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+            title="Export Workflow Layout JSON"
+          >
+            <Download className="h-4 w-4" />
+          </button>
 
           {/* Workflow Secrets Vault Link (Opens in New Tab) */}
           <Link
@@ -746,6 +805,101 @@ function CanvasInner({
           runs={runs}
           onClose={() => setIsSidebarOpen(false)}
         />
+      )}
+
+      {/* Run Confirmation Modal Overlay - White BG, Sharp Edges, Solid Contrast */}
+      {isRunModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white border-2 border-neutral-900 rounded-none p-6 shadow-2xl space-y-6 text-neutral-900 relative">
+            <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-neutral-900 text-white rounded-none">
+                  <Coins className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Run Workflow Confirmation</h3>
+                  <p className="text-xs text-neutral-500 font-medium">Review credit cost before execution</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsRunModalOpen(false)}
+                className="p-1.5 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-neutral-700 transition-all cursor-pointer rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Credit Breakdown Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 bg-neutral-100 border border-neutral-300 rounded-none space-y-1">
+                <span className="text-[10px] font-extrabold text-neutral-500 uppercase tracking-wider block">
+                  Workflow Cost
+                </span>
+                <span className="text-2xl font-black text-neutral-900 font-mono">
+                  {calculateTotalCost()} Credits
+                </span>
+              </div>
+
+              <div className="p-4 bg-neutral-100 border border-neutral-300 rounded-none space-y-1">
+                <span className="text-[10px] font-extrabold text-neutral-500 uppercase tracking-wider block">
+                  Your Balance
+                </span>
+                <span className="text-2xl font-black text-emerald-700 font-mono">
+                  {userCredits ? `${userCredits.total} Credits` : "..."}
+                </span>
+              </div>
+            </div>
+
+            {/* Balance After Run / Insufficient Warning */}
+            {userCredits && userCredits.total < calculateTotalCost() ? (
+              <div className="p-4 bg-red-50 border border-red-300 text-red-900 text-xs space-y-1.5 rounded-none">
+                <div className="font-bold text-red-700 flex items-center gap-1.5">
+                  <span>⚠️ Insufficient Credits</span>
+                </div>
+                <p className="text-red-800 leading-snug font-medium">
+                  You need <strong>{calculateTotalCost()} credits</strong> to run this workflow, but only have <strong>{userCredits.total} credits</strong> left. Next free reset is on <strong>{new Date(userCredits.resetDate).toLocaleDateString()}</strong>.
+                </p>
+              </div>
+            ) : (
+              <div className="p-4 bg-neutral-100 border border-neutral-300 rounded-none flex items-center justify-between text-xs">
+                <span className="text-neutral-600 font-bold uppercase tracking-wider text-[11px]">Balance After Execution:</span>
+                <span className="font-black font-mono text-neutral-900 text-sm">
+                  {userCredits ? `${userCredits.total - calculateTotalCost()} Credits` : "..."}
+                </span>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setIsRunModalOpen(false)}
+                className="px-5 py-2.5 border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-900 text-xs font-bold rounded-none transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              {userCredits && userCredits.total < calculateTotalCost() ? (
+                <Link
+                  href="/billing"
+                  target="_blank"
+                  className="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white text-xs font-extrabold rounded-none transition-all shadow-md cursor-pointer flex items-center gap-2"
+                >
+                  <Coins className="w-4 h-4" />
+                  <span>Top Up Credits</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={executeWorkflowRun}
+                  disabled={isStartingRun}
+                  className="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white text-xs font-extrabold rounded-none transition-all shadow-md cursor-pointer flex items-center gap-2 disabled:opacity-50 active:scale-95"
+                >
+                  <Play className="w-4 h-4 fill-current text-white" />
+                  <span>Confirm & Run</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Right Slide-over Node Inspector Drawer */}
