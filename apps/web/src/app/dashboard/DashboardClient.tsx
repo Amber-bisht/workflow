@@ -314,46 +314,21 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
                     <div
                       key={flow.id}
                       onClick={() => router.push(`/workflow/${flow.id}`)}
-                      className="group rounded-3xl border border-white/10 bg-neutral-900/60 hover:bg-neutral-900/90 p-6 flex flex-col justify-between gap-5 hover:border-white/20 transition-all duration-300 backdrop-blur-xl shadow-xl hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] cursor-pointer relative overflow-hidden"
+                      className="group rounded-2xl border border-white/10 bg-neutral-900/80 hover:bg-neutral-900 hover:border-white/30 p-5 flex flex-col justify-between gap-4 transition-all duration-300 shadow-md hover:shadow-[0_0_25px_rgba(255,255,255,0.08)] cursor-pointer relative overflow-hidden"
                     >
-                      <div className="space-y-4">
+                      {/* Top Header Row */}
+                      <div className="space-y-2">
                         <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all shrink-0">
-                              <Workflow className="w-4 h-4 text-neutral-400 group-hover:text-blue-400 transition-colors" />
-                            </div>
-                            <h4 className="font-bold text-white text-base tracking-tight truncate group-hover:text-blue-400 transition-colors">
-                              {flow.name}
-                            </h4>
-                          </div>
+                          <h4 className="font-bold text-white text-base tracking-tight truncate group-hover:text-blue-400 transition-colors">
+                            {flow.name}
+                          </h4>
 
-                          {latestRun ? (
-                            <StatusTag status={latestRun.status} />
-                          ) : (
-                            <span className="text-[10px] font-mono font-bold text-neutral-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full shrink-0">
-                              Canvas
-                            </span>
-                          )}
-                        </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {latestRun && <StatusTag status={latestRun.status} />}
 
-                        <p className="text-neutral-400 text-xs line-clamp-2 leading-relaxed min-h-[2.5rem]">
-                          {flow.description || "Visual node workflow pipeline."}
-                        </p>
-                      </div>
-
-                      <div className="space-y-3 pt-2">
-                        <div className="h-[1px] bg-white/10" />
-
-                        <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
-                          <div className="flex items-center gap-1.5 text-neutral-400">
-                            <Calendar className="w-3.5 h-3.5" />
-                            <span suppressHydrationWarning>{formatDate(flow.updatedAt)}</span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            {/* Actions */}
+                            {/* Rename & Delete Actions */}
                             <div
-                              className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-950/80 border border-white/10 rounded-full px-1 py-0.5"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <button
@@ -364,22 +339,34 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
                                   setIsRenameOpen(true);
                                 }}
                                 title="Rename Workflow"
-                                className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                                className="p-1 rounded-md hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
                               >
-                                <Edit3 className="w-3.5 h-3.5" />
+                                <Edit3 className="w-3 h-3" />
                               </button>
                               <button
                                 onClick={() => handleDelete(flow.id)}
                                 title="Delete Workflow"
-                                className="p-1.5 rounded-lg hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
+                                className="p-1 rounded-md hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className="w-3 h-3" />
                               </button>
                             </div>
-
-                            <ArrowRight className="w-4 h-4 text-neutral-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
                           </div>
                         </div>
+
+                        <p className="text-neutral-400 text-xs line-clamp-1 leading-relaxed">
+                          {flow.description || "Visual node automation workflow."}
+                        </p>
+                      </div>
+
+                      {/* Footer Row */}
+                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
+                        <span suppressHydrationWarning className="text-neutral-500">{formatDate(flow.updatedAt)}</span>
+
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-300 group-hover:text-blue-400 transition-colors">
+                          Open
+                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                        </span>
                       </div>
                     </div>
                   );

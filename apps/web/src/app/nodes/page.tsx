@@ -1,20 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import {
-  Bot,
-  Search,
-  Activity,
-  Send,
-  Mail,
-  Zap,
-  Cpu,
-  Layers,
-  ArrowRight,
-  Sparkles,
-  CheckCircle2
-} from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/AppHeader";
 
@@ -24,8 +11,18 @@ const NODES_DATA = [
     name: "OpenRouter / Gemini LLM",
     category: "AI & LLM",
     cost: "5 credits / run",
-    icon: <Bot className="w-5 h-5 text-purple-400" />,
-    color: "purple",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 0C12 6.62742 6.62742 12 0 12C6.62742 12 12 17.3726 12 24C12 17.3726 17.3726 12 24 12C17.3726 12 12 6.62742 12 0Z" fill="url(#gemini_grad)" />
+        <defs>
+          <linearGradient id="gemini_grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#4285F4" />
+            <stop offset="0.5" stopColor="#9B51E0" />
+            <stop offset="1" stopColor="#E91E63" />
+          </linearGradient>
+        </defs>
+      </svg>
+    ),
     description: "Generate structured responses, summarize data, and solve complex reasoning tasks with LLMs.",
     features: [
       "Custom prompt engineering",
@@ -40,8 +37,13 @@ const NODES_DATA = [
     name: "Tavily Web Search",
     category: "Web Search",
     cost: "3 credits / search",
-    icon: <Search className="w-5 h-5 text-cyan-400" />,
-    color: "cyan",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+        <path d="M11 7v8M7 11h8" />
+      </svg>
+    ),
     description: "Perform real-time web searches and context retrieval for fresh external web knowledge.",
     features: [
       "Real-time web search index",
@@ -56,8 +58,11 @@ const NODES_DATA = [
     name: "Website Uptime Monitor",
     category: "Monitoring",
     cost: "2 credits / check",
-    icon: <Activity className="w-5 h-5 text-emerald-400" />,
-    color: "emerald",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      </svg>
+    ),
     description: "Monitor website availability, verify HTTP status codes, and measure server latency.",
     features: [
       "HTTP Status Code checking (e.g. 200 OK)",
@@ -72,8 +77,11 @@ const NODES_DATA = [
     name: "Telegram Bot Alert",
     category: "Alerts & Messages",
     cost: "1 credit / message",
-    icon: <Send className="w-5 h-5 text-sky-400" />,
-    color: "sky",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#229ED9">
+        <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.51c-.15.68-.55.84-1.12.52l-3.1-2.29-1.5 1.44c-.16.16-.3.3-.61.3l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.13 4.49-3.08-.96c-.67-.21-.68-.67.14-.99l12.03-4.64c.56-.21 1.05.13.88.88z"/>
+      </svg>
+    ),
     description: "Send automated real-time notifications and alerts directly to your Telegram chat or channel.",
     features: [
       "Instant push notification delivery",
@@ -85,11 +93,14 @@ const NODES_DATA = [
   },
   {
     id: "resend",
-    name: "Resend Transactional Email",
+    name: "Resend Email",
     category: "Alerts & Messages",
     cost: "1 credit / email",
-    icon: <Mail className="w-5 h-5 text-rose-400" />,
-    color: "rose",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+        <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" />
+      </svg>
+    ),
     description: "Deliver clean, high-deliverability HTML emails and reports to your users or team.",
     features: [
       "Custom HTML & Markdown body",
@@ -104,8 +115,11 @@ const NODES_DATA = [
     name: "Request Input & Trigger",
     category: "Inputs",
     cost: "0 credits (Free)",
-    icon: <Zap className="w-5 h-5 text-amber-400" />,
-    color: "amber",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#F59E0B">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+      </svg>
+    ),
     description: "The starting trigger node for manual or programmatic webhook workflow execution.",
     features: [
       "Free execution trigger",
@@ -117,15 +131,7 @@ const NODES_DATA = [
   }
 ];
 
-const CATEGORIES = ["All Nodes", "AI & LLM", "Web Search", "Monitoring", "Alerts & Messages", "Inputs"];
-
 export default function NodeLibraryPage() {
-  const [selectedCategory, setSelectedCategory] = useState("All Nodes");
-
-  const filteredNodes = selectedCategory === "All Nodes"
-    ? NODES_DATA
-    : NODES_DATA.filter((node) => node.category === selectedCategory);
-
   return (
     <div className="flex h-screen w-screen bg-[#030507] text-white font-sans overflow-hidden selection:bg-white selection:text-black">
       {/* ── App Sidebar ─────────────────────────────────────────────────────── */}
@@ -138,29 +144,29 @@ export default function NodeLibraryPage() {
           {/* Page Header */}
           <AppHeader title="Node Library" />
 
-          {/* Node Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Sharp Node Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {NODES_DATA.map((node) => (
               <div
                 key={node.id}
-                className="rounded-3xl border border-white/10 bg-neutral-900/60 p-6 sm:p-7 flex flex-col justify-between gap-6 hover:border-white/20 transition-all shadow-xl backdrop-blur-xl group"
+                className="rounded-xl border border-white/15 bg-[#0a0d12] hover:bg-[#0f131a] hover:border-white/30 p-6 flex flex-col justify-between gap-5 transition-all duration-200 shadow-lg relative group"
               >
                 <div className="space-y-4">
-                  {/* Top Row: Icon + Category + Cost */}
+                  {/* Top Row: Brand Icon + Category + Cost */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-105 transition-transform">
+                      <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/15 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         {node.icon}
                       </div>
                       <div>
                         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500 block">
                           {node.category}
                         </span>
-                        <h3 className="text-lg font-bold text-white tracking-tight">{node.name}</h3>
+                        <h3 className="text-base font-bold text-white tracking-tight">{node.name}</h3>
                       </div>
                     </div>
 
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-800 border border-white/15 text-white text-xs font-mono font-bold shadow-inner shrink-0">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-neutral-900 border border-white/15 text-white text-xs font-mono font-bold shrink-0">
                       {node.cost}
                     </span>
                   </div>
@@ -171,7 +177,7 @@ export default function NodeLibraryPage() {
 
                   <div className="h-[1px] bg-white/10" />
 
-                  {/* Features */}
+                  {/* Capabilities */}
                   <div className="space-y-2">
                     <span className="text-[11px] font-mono font-bold uppercase text-neutral-500 tracking-wider block">
                       Key Capabilities
@@ -193,17 +199,17 @@ export default function NodeLibraryPage() {
                     <span className="text-[11px] font-mono font-bold uppercase text-neutral-500 tracking-wider block">
                       How It Works
                     </span>
-                    <p className="text-xs text-neutral-400 bg-neutral-950 p-3 rounded-2xl border border-white/10 leading-relaxed font-mono">
+                    <p className="text-xs text-neutral-400 bg-neutral-950 p-3 rounded-lg border border-white/10 leading-relaxed font-mono">
                       {node.howItWorks}
                     </p>
                   </div>
                 </div>
 
-                {/* Bottom Action */}
+                {/* Sharp Bottom Action */}
                 <div className="pt-2">
                   <Link
                     href="/dashboard?create=true"
-                    className="w-full py-2.5 rounded-full bg-white/10 hover:bg-white text-white hover:text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 border border-white/10 cursor-pointer shadow-md active:scale-95"
+                    className="w-full py-2.5 rounded-lg bg-white/10 hover:bg-white text-white hover:text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 border border-white/15 cursor-pointer shadow-md active:scale-95 uppercase tracking-wider"
                   >
                     <span>Use in Workflow</span>
                     <ArrowRight className="w-3.5 h-3.5" />
