@@ -66,18 +66,11 @@ export class WorkflowEngine {
       const nodes = (run.nodesData as any)?.nodes || [];
       const edges = (run.nodesData as any)?.edges || [];
 
-      // 2. Identify nodes in execution scope (exclude passthrough nodes)
-      let nodesToRun: string[] = [];
+      // 2. Identify executable nodes (exclude passthrough nodes)
       const PASSTHROUGH = ["RequestInputs", "Response"];
-      if (scope === "FULL") {
-        nodesToRun = nodes
-          .filter((n: any) => !PASSTHROUGH.includes(n.type))
-          .map((n: any) => n.id);
-      } else {
-        nodesToRun = nodes
-          .filter((n: any) => selectedNodeIds.includes(n.id) && !PASSTHROUGH.includes(n.type))
-          .map((n: any) => n.id);
-      }
+      const nodesToRun = nodes
+        .filter((n: any) => !PASSTHROUGH.includes(n.type))
+        .map((n: any) => n.id);
 
       await prisma.workflowRun.update({
         where: { id: workflowRunId },

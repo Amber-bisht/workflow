@@ -6,14 +6,14 @@ import { workflowEvents } from "../services/WorkflowEngine";
 
 export const workflowRouter = new Hono();
 
-// POST /api/workflow/run - Initiate execution
+// POST /api/workflow/run - Initiate full workflow execution
 workflowRouter.post("/run", async (c) => {
   try {
     const body = await c.req.json();
-    const { workflowId, scope = "FULL", selectedNodeIds = [] } = body;
+    const { workflowId } = body;
 
-    if (!workflowId) {
-      return c.json({ error: "workflowId is required" }, 400);
+    if (!workflowId || typeof workflowId !== "string") {
+      return c.json({ error: "Valid workflowId is required" }, 400);
     }
 
     const workflow = await prisma.workflow.findUnique({
@@ -21,14 +21,14 @@ workflowRouter.post("/run", async (c) => {
     });
 
     if (!workflow) {
-      return c.json({ error: "Workflow not found" }, 404);
+      return c.json({ error: "Workflow not found in database" }, 404);
     }
 
     const run = await prisma.workflowRun.create({
       data: {
         workflowId,
         status: "PENDING",
-        scope,
+        scope: "FULL",
         triggerSource: "MANUAL",
         nodesData: {
           nodes: workflow.nodes,
@@ -40,8 +40,8 @@ workflowRouter.post("/run", async (c) => {
     await dispatchWorkflowRun({
       workflowId,
       workflowRunId: run.id,
-      scope,
-      selectedNodeIds,
+      scope: "FULL",
+      selectedNodeIds: [],
     });
 
     return c.json({

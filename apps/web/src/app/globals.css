@@ -31,7 +31,7 @@ body {
   pointer-events: all !important;
 }
 
-/* Single Unified Canvas Grid Background */
+/* Clean Line Grid (#cbd5e1 1.2px lines) */
 .react-flow,
 .react-flow__renderer,
 .react-flow__viewport {
@@ -42,13 +42,45 @@ body {
 .react-flow__pane {
   background-color: #ffffff !important;
   background-image: 
-    linear-gradient(to right, #cbd5e1 1px, transparent 1px),
-    linear-gradient(to bottom, #cbd5e1 1px, transparent 1px) !important;
+    linear-gradient(to right, #cbd5e1 1.2px, transparent 1.2px),
+    linear-gradient(to bottom, #cbd5e1 1.2px, transparent 1.2px) !important;
   background-size: 28px 28px !important;
 }
 
 .react-flow__background {
   display: none !important;
+}
+
+/* Hide ReactFlow Watermark Attribution */
+.react-flow__attribution {
+  display: none !important;
+}
+
+/* Style & Constrain MiniMap SVG Frame */
+.react-flow__minimap {
+  position: relative !important;
+  bottom: auto !important;
+  right: auto !important;
+  z-index: 50 !important;
+  background: #090d16 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.react-flow__minimap svg {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(15, 23, 42, 0.75) !important;
+  stroke: rgba(255, 255, 255, 0.25) !important;
+  stroke-width: 1px !important;
+}
+
+.react-flow__minimap-node {
+  rx: 3px !important;
+  ry: 3px !important;
 }
 
 .react-flow__handle:hover {

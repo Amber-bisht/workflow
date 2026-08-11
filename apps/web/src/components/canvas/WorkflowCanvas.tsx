@@ -118,7 +118,7 @@ function CanvasInner({
   const { zoom } = useViewport();
   const [isLocked, setIsLocked] = useState(false);
   const [isControlsCollapsed, setIsControlsCollapsed] = useState(false);
-  const [showMiniMap, setShowMiniMap] = useState(true);
+  const [showMiniMap, setShowMiniMap] = useState(false);
 
   // 1. Initialize canvas state
   useEffect(() => {
@@ -243,21 +243,9 @@ function CanvasInner({
   }, [activeRunId, setActiveRunId, setRunStatus, setNodes, setRunningNodes]);
 
   // 4. Trigger Executions
-  const handleRun = async (scope: "FULL" | "SINGLE" | "PARTIAL") => {
+  const handleRun = async () => {
     setIsStartingRun(true);
     setRunStatus("RUNNING");
-    
-    // Get targeted node IDs
-    let selectedNodeIds: string[] = [];
-    if (scope === "SINGLE" || scope === "PARTIAL") {
-      selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
-      if (selectedNodeIds.length === 0) {
-        alert("Please select at least one node to execute selectively.");
-        setIsStartingRun(false);
-        setRunStatus("IDLE");
-        return;
-      }
-    }
 
     try {
       const res = await fetch("/api/workflow/run", {
@@ -265,8 +253,6 @@ function CanvasInner({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workflowId,
-          scope,
-          selectedNodeIds,
         }),
       });
 
@@ -275,15 +261,14 @@ function CanvasInner({
         setActiveRunId(data.runId);
         
         // Add draft pending run to history immediately with all nodes visible
-        const nodesToShow = scope === "FULL" ? nodes : nodes.filter(n => selectedNodeIds.includes(n.id));
         const mockRun = {
           id: data.runId,
           status: "PENDING",
-          scope,
+          scope: "FULL",
           triggerSource: "MANUAL",
           createdAt: new Date().toISOString(),
           duration: null,
-          nodeRuns: nodesToShow.map(node => ({
+          nodeRuns: nodes.map(node => ({
             id: `node-run-${node.id}`,
             nodeId: node.id,
             nodeType: node.type || "Unknown",
@@ -300,9 +285,10 @@ function CanvasInner({
         throw new Error(data.error || "Failed to trigger execution");
       }
     } catch (err: any) {
-      alert(err.message || "Failed to start run");
+      alert(`Execution Error: ${err.message}`);
+      setRunStatus("FAILED");
+    } finally {
       setIsStartingRun(false);
-      setRunStatus("IDLE");
     }
   };
 
@@ -474,7 +460,6 @@ function CanvasInner({
           <div className="h-4 w-[1px] bg-white/10" />
           <div>
             <h1 className="font-bold text-white text-sm tracking-tight leading-tight">{initialName}</h1>
-            <span className="text-[9px] text-neutral-400 block font-mono">Autosaved Canvas</span>
           </div>
         </div>
 
@@ -482,36 +467,40 @@ function CanvasInner({
         <div className="bg-neutral-900/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-2xl text-white pointer-events-auto">
           {getStatusIndicator()}
 
-          {/* Run Executions */}
-          <div className="flex items-center bg-neutral-950 border border-white/10 rounded-xl p-1 gap-1">
-            <button
-              onClick={() => handleRun("FULL")}
-              disabled={isStartingRun}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-neutral-200 disabled:bg-neutral-800 disabled:opacity-50 text-black rounded-lg text-xs font-bold transition-all shadow-md cursor-pointer"
-            >
-              <Play className="h-3.5 w-3.5 fill-current" />
-              Run Flow
-            </button>
-            <button
-              onClick={() => handleRun("PARTIAL")}
-              disabled={isStartingRun || !nodes.some(n => n.selected)}
-              className="px-3 py-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold transition-all cursor-pointer"
-              title="Run selected nodes only"
-            >
-              Run Selection
-            </button>
-          </div>
+          {/* Run Execution */}
+          <button
+            onClick={handleRun}
+            disabled={isStartingRun}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-white hover:bg-neutral-200 disabled:bg-neutral-800 disabled:opacity-50 text-black rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+          >
+            <Play className="h-3.5 w-3.5 fill-current text-black" />
+            Run Flow
+          </button>
 
           <div className="h-4 w-[1px] bg-white/10" />
+
+          {/* Toggle MiniMap button */}
+          <button
+            onClick={() => setShowMiniMap(!showMiniMap)}
+            className={`p-2 rounded-xl border transition-all cursor-pointer ${
+              showMiniMap
+                ? "bg-blue-600 border-blue-500 text-white shadow-md"
+                : "border-white/10 text-neutral-400 hover:text-white hover:bg-white/10"
+            }`}
+            title={showMiniMap ? "Hide MiniMap" : "View MiniMap"}
+          >
+            <Map className="h-4 w-4" />
+          </button>
 
           {/* Toggle sidebar button */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className={`p-2 rounded-xl border transition-all cursor-pointer ${
               isSidebarOpen
-                ? "bg-blue-500/20 border-blue-500/30 text-blue-400"
+                ? "bg-blue-600 border-blue-500 text-white shadow-md"
                 : "border-white/10 text-neutral-400 hover:text-white hover:bg-white/10"
             }`}
+            title="Execution History"
           >
             <History className="h-4 w-4" />
           </button>
@@ -536,10 +525,10 @@ function CanvasInner({
           zoomOnScroll={!isLocked}
         >
 
-          {/* React Flow elements */}
+          {/* MiniMap Floating Overlay */}
           {showMiniMap && (
-            <Panel position="bottom-right" style={{ margin: 0 }}>
-              <div className="relative">
+            <Panel position="bottom-right" className="!m-6 !z-50">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-neutral-900/95 backdrop-blur-2xl p-1 pointer-events-auto">
                 <MiniMap
                   zoomable
                   pannable
@@ -553,19 +542,22 @@ function CanvasInner({
                     if (node.type === "ResendEmail") return "#f43f5e";
                     return "#3b82f6";
                   }}
-                  maskColor="rgba(3, 5, 7, 0.8)"
+                  maskColor="rgba(15, 23, 42, 0.75)"
                   style={{
-                    background: "#0a0d12",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    borderRadius: "16px",
+                    position: "relative",
+                    bottom: "auto",
+                    right: "auto",
+                    background: "#090d16",
+                    borderRadius: "12px",
+                    width: 200,
+                    height: 130,
                     margin: 0,
                   }}
                 />
                 <button
                   onClick={() => setShowMiniMap(false)}
-                  className="absolute top-2 right-2 p-1.5 bg-neutral-900 hover:bg-neutral-800 border border-white/10 rounded-lg shadow-sm text-neutral-400 hover:text-white cursor-pointer transition-all"
+                  className="absolute top-2.5 right-2.5 p-1.5 bg-neutral-950/90 hover:bg-neutral-800 border border-white/15 rounded-lg shadow-md text-neutral-400 hover:text-white cursor-pointer transition-all z-[60]"
                   title="Close MiniMap"
-                  style={{ zIndex: 100 }}
                 >
                   <Minimize2 className="h-3.5 w-3.5" />
                 </button>
@@ -714,18 +706,6 @@ function CanvasInner({
                 )}
               </button>
 
-              {/* Toggle MiniMap */}
-              <button
-                onClick={() => setShowMiniMap(!showMiniMap)}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  showMiniMap 
-                    ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" 
-                    : "text-neutral-400 hover:text-white hover:bg-white/10"
-                }`}
-                title={showMiniMap ? "Hide MiniMap" : "Show MiniMap"}
-              >
-                <Map className="h-4 w-4" />
-              </button>
               {/* Move/Pan Mode Indicator */}
               <div 
                 className="p-1 text-neutral-400 cursor-default select-none"
