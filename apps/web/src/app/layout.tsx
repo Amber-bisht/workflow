@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
-import { CandidateLog } from "@/components/CandidateLog";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -32,7 +31,6 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100 font-sans">
         <SessionProvider>
-          <CandidateLog />
           {children}
         </SessionProvider>
       </body>

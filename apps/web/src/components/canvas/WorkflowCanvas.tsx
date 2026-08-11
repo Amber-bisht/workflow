@@ -124,6 +124,12 @@ function CanvasInner({
   useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
+    console.info("[NextFlow Canvas] Grid initialized:", {
+      workflowId,
+      nodesCount: initialNodes.length,
+      edgesCount: initialEdges.length,
+      background: "White Canvas + 28px Linear Grid",
+    });
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   // 2. Auto-save layout on changes
@@ -137,7 +143,6 @@ function CanvasInner({
     const timer = setTimeout(async () => {
       try {
         await updateWorkflow(workflowId, nodes, edges);
-        console.log("[Auto-save] Layout synced to database.");
       } catch (err) {
         console.error("Auto-save failed:", err);
       }
@@ -302,18 +307,36 @@ function CanvasInner({
   };
 
   // Add new custom nodes from picker
-  const handleAddNode = (type: "CropImage" | "Gemini") => {
+  const handleAddNode = (type: string) => {
     const x = window.innerWidth / 2 - 140;
     const y = window.innerHeight / 2 - 100;
     const position = screenToFlowPosition({ x, y });
     const id = `${type.toLowerCase()}_${Date.now()}`;
+
+    let defaultData: any = {};
+    if (type === "CropImage") {
+      defaultData = { x: 0, y: 0, w: 100, h: 100 };
+    } else if (type === "Gemini" || type === "OpenRouter") {
+      defaultData = { model: "openai/gpt-4o", temperature: 0.7, prompt: "" };
+    } else if (type === "TavilySearch") {
+      defaultData = { query: "Latest AI news" };
+    } else if (type === "WebsiteMonitor") {
+      defaultData = { url: "https://automation.amberbisht.me" };
+    } else if (type === "Telegram") {
+      defaultData = { message: "System Alert: Canvas pipeline step completed." };
+    } else if (type === "ResendEmail") {
+      defaultData = { subject: "Workflow Alert", body: "Automation report" };
+    } else if (type === "RequestInputs") {
+      defaultData = { prompt: "Default input prompt" };
+    } else if (type === "Response") {
+      defaultData = {};
+    }
+
     const newNode = {
       id,
       type,
       position,
-      data: type === "CropImage"
-        ? { x: 0, y: 0, w: 100, h: 100 }
-        : { model: "gemini-2.5-flash", temperature: 0.7, prompt: "" },
+      data: defaultData,
     };
     setNodes([...nodes, newNode]);
     setIsPickerOpen(false);
@@ -346,7 +369,28 @@ function CanvasInner({
 
   // Export layout to JSON
   const handleExport = () => {
-    const layout = { nodes, edges };
+    const layout = {
+      workflowId,
+      name: initialName,
+      exportedAt: new Date().toISOString(),
+      schemaVersion: 2,
+      nodes: nodes.map((node) => ({
+        id: node.id,
+        type: node.type,
+        position: node.position,
+        data: node.data,
+      })),
+      edges: edges.map((edge) => ({
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        sourceHandle: edge.sourceHandle,
+        targetHandle: edge.targetHandle,
+        type: edge.type,
+        animated: edge.animated,
+        style: edge.style,
+      })),
+    };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(layout, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
@@ -366,15 +410,13 @@ function CanvasInner({
       try {
         const layout = JSON.parse(event.target?.result as string);
         if (Array.isArray(layout.nodes) && Array.isArray(layout.edges)) {
-          // Keep RequestInputs and Response deletable properties
-          const processedNodes = layout.nodes.map((n: any) => {
-            if (n.type === "RequestInputs" || n.type === "Response") {
-              return { ...n, deletable: false };
-            }
-            return n;
-          });
+          const processedNodes = layout.nodes.map((n: any) => ({
+            id: n.id,
+            type: n.type,
+            position: n.position || { x: 100, y: 100 },
+            data: n.data || {},
+          }));
           importLayout(processedNodes, layout.edges);
-          alert("Layout imported successfully!");
         } else {
           alert("Invalid layout file structure.");
         }
@@ -383,6 +425,7 @@ function CanvasInner({
       }
     };
     reader.readAsText(file);
+    if (e.target) e.target.value = "";
   };
 
   const getStatusIndicator = () => {
@@ -415,36 +458,36 @@ function CanvasInner({
   };
 
   return (
-    <div className="flex h-screen w-screen bg-white text-neutral-100 overflow-hidden relative">
+    <div className="flex h-screen w-screen bg-[#f8fafc] text-neutral-900 overflow-hidden relative">
       {/* Upper Panel / Navigation Header Layout Wrapper */}
       <header className={`absolute top-4 left-4 z-40 flex items-center justify-between gap-6 pointer-events-none transition-all duration-300 ${
         isSidebarOpen ? "right-[376px]" : "right-4"
       }`}>
         {/* Left Floating Card: Back Button & Workflow Name */}
-        <div className="bg-white/95 backdrop-blur-md border border-neutral-200/80 rounded-xl px-4 py-2.5 flex items-center gap-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] text-neutral-800 pointer-events-auto">
+        <div className="bg-neutral-900/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-2xl text-white pointer-events-auto">
           <Link
             href="/dashboard"
-            className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 border border-transparent hover:border-neutral-200 transition-all"
+            className="p-1.5 rounded-xl hover:bg-white/10 text-neutral-400 hover:text-white border border-transparent hover:border-white/10 transition-all"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
-          <div className="h-4 w-[1px] bg-neutral-250" />
+          <div className="h-4 w-[1px] bg-white/10" />
           <div>
-            <h1 className="font-bold text-neutral-850 leading-tight">{initialName}</h1>
-            <span className="text-[9px] text-neutral-500 block">Autosaved Layout</span>
+            <h1 className="font-bold text-white text-sm tracking-tight leading-tight">{initialName}</h1>
+            <span className="text-[9px] text-neutral-400 block font-mono">Autosaved Canvas</span>
           </div>
         </div>
 
         {/* Right Floating Card: Status & Execution Controls */}
-        <div className="bg-white/95 backdrop-blur-md border border-neutral-200/80 rounded-xl px-4 py-2.5 flex items-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.06)] text-neutral-800 pointer-events-auto">
+        <div className="bg-neutral-900/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-2xl text-white pointer-events-auto">
           {getStatusIndicator()}
-          
+
           {/* Run Executions */}
-          <div className="flex items-center bg-neutral-50 border border-neutral-200/80 rounded-lg p-0.5">
+          <div className="flex items-center bg-neutral-950 border border-white/10 rounded-xl p-1 gap-1">
             <button
               onClick={() => handleRun("FULL")}
               disabled={isStartingRun}
-              className="flex items-center gap-1 px-3 py-1.5 bg-[#111] hover:bg-neutral-800 disabled:bg-neutral-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-neutral-200 disabled:bg-neutral-800 disabled:opacity-50 text-black rounded-lg text-xs font-bold transition-all shadow-md cursor-pointer"
             >
               <Play className="h-3.5 w-3.5 fill-current" />
               Run Flow
@@ -452,22 +495,22 @@ function CanvasInner({
             <button
               onClick={() => handleRun("PARTIAL")}
               disabled={isStartingRun || !nodes.some(n => n.selected)}
-              className="px-2.5 py-1.5 text-neutral-500 hover:text-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold transition-all"
+              className="px-3 py-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold transition-all cursor-pointer"
               title="Run selected nodes only"
             >
               Run Selection
             </button>
           </div>
 
-          <div className="h-4 w-[1px] bg-neutral-250" />
+          <div className="h-4 w-[1px] bg-white/10" />
 
           {/* Toggle sidebar button */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`p-1.5 rounded-lg border transition-all ${
-              isSidebarOpen 
-                ? "bg-blue-50 border-blue-200 text-blue-600" 
-                : "border-neutral-200 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50"
+            className={`p-2 rounded-xl border transition-all cursor-pointer ${
+              isSidebarOpen
+                ? "bg-blue-500/20 border-blue-500/30 text-blue-400"
+                : "border-white/10 text-neutral-400 hover:text-white hover:bg-white/10"
             }`}
           >
             <History className="h-4 w-4" />
@@ -476,7 +519,7 @@ function CanvasInner({
       </header>
 
       {/* Main Canvas Area */}
-      <main className="flex-1 h-full w-full relative">
+      <main className="flex-1 h-full w-full relative bg-[#f8fafc] bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] bg-[size:28px_28px]">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -495,32 +538,36 @@ function CanvasInner({
           zoomOnDoubleClick={!isLocked}
           preventScrolling={isLocked}
         >
-          <Background variant={BackgroundVariant.Dots} color="#cbd5e1" gap={20} size={1.5} />
-          
+          <Background variant={BackgroundVariant.Lines} color="#94a3b8" gap={28} />
+
           {/* React Flow elements */}
           {showMiniMap && (
             <Panel position="bottom-right" style={{ margin: 0 }}>
               <div className="relative">
-                <MiniMap 
-                  zoomable 
-                  pannable 
+                <MiniMap
+                  zoomable
+                  pannable
                   nodeColor={(node) => {
-                    if (node.type === "RequestInputs") return "#525252";
+                    if (node.type === "RequestInputs") return "#F59E0B";
                     if (node.type === "CropImage") return "#f97316";
-                    if (node.type === "Gemini" || node.type === "Response") return "#3b82f6";
-                    return "#181818";
+                    if (node.type === "Gemini" || node.type === "OpenRouter") return "#a855f7";
+                    if (node.type === "TavilySearch") return "#06b6d4";
+                    if (node.type === "WebsiteMonitor") return "#10b981";
+                    if (node.type === "Telegram") return "#0ea5e9";
+                    if (node.type === "ResendEmail") return "#f43f5e";
+                    return "#3b82f6";
                   }}
-                  maskColor="rgba(3, 3, 3, 0.7)"
+                  maskColor="rgba(3, 5, 7, 0.8)"
                   style={{
-                    background: "#0d0d0d",
-                    border: "1px solid #1e1e1e",
-                    borderRadius: "12px",
+                    background: "#0a0d12",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    borderRadius: "16px",
                     margin: 0,
                   }}
                 />
                 <button
                   onClick={() => setShowMiniMap(false)}
-                  className="absolute top-2 right-2 p-1.5 bg-white hover:bg-neutral-50 border border-neutral-200 rounded-lg shadow-sm text-neutral-500 hover:text-neutral-800 cursor-pointer pointer-events-auto transition-all"
+                  className="absolute top-2 right-2 p-1.5 bg-neutral-900 hover:bg-neutral-800 border border-white/10 rounded-lg shadow-sm text-neutral-400 hover:text-white cursor-pointer transition-all"
                   title="Close MiniMap"
                   style={{ zIndex: 100 }}
                 >
@@ -540,13 +587,13 @@ function CanvasInner({
         )}
 
         {/* Custom Bottom floating toolbar (Center) */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md border border-neutral-200/80 px-4 py-2.5 rounded-2xl flex items-center gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.08)] text-neutral-800">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 bg-neutral-900/90 backdrop-blur-xl border border-white/10 px-4 py-2.5 rounded-2xl flex items-center gap-4 shadow-2xl text-white">
           {/* Undo/Redo */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={undo}
               disabled={undoStack.length === 0}
-              className="p-1.5 rounded hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="Undo (Cmd+Z)"
             >
               <Undo2 className="h-4 w-4" />
@@ -554,42 +601,42 @@ function CanvasInner({
             <button
               onClick={redo}
               disabled={redoStack.length === 0}
-              className="p-1.5 rounded hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="Redo (Cmd+Shift+Z)"
             >
               <Redo2 className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="h-4 w-[1px] bg-neutral-200" />
+          <div className="h-4 w-[1px] bg-white/10" />
 
-          {/* Add node - only show when workflow is not running (Idle/Success/Failed) */}
+          {/* Add node - only show when workflow is not running */}
           {runStatus !== "RUNNING" && (
             <>
               <button
                 onClick={() => setIsPickerOpen(!isPickerOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-800 rounded-lg text-xs font-semibold transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-black hover:bg-neutral-200 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
               >
-                <Plus className="h-3.5 w-3.5 text-blue-500" />
+                <Plus className="h-3.5 w-3.5 text-black" />
                 Add Node
               </button>
-              <div className="h-4 w-[1px] bg-neutral-200" />
+              <div className="h-4 w-[1px] bg-white/10" />
             </>
           )}
 
           {/* Import/Export */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={handleExport}
-              className="p-1.5 rounded hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800 transition-all"
-              title="Export Layout"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-all cursor-pointer"
+              title="Export Layout JSON"
             >
               <Download className="h-4 w-4" />
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-1.5 rounded hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800 transition-all"
-              title="Import Layout"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-all cursor-pointer"
+              title="Import Layout JSON"
             >
               <Upload className="h-4 w-4" />
             </button>
@@ -604,11 +651,11 @@ function CanvasInner({
         </div>
 
         {/* Custom Bottom Left Viewport & Zoom Controls */}
-        <div className="absolute bottom-6 left-6 z-40 bg-white/95 backdrop-blur-md border border-neutral-200/80 px-3 py-1.5 rounded-2xl flex items-center gap-2.5 shadow-[0_8px_30px_rgba(0,0,0,0.08)] text-neutral-800 transition-all">
+        <div className="absolute bottom-6 left-6 z-40 bg-neutral-900/90 backdrop-blur-xl border border-white/10 px-3 py-1.5 rounded-2xl flex items-center gap-2.5 shadow-2xl text-white transition-all">
           {/* Collapse/Expand Toggle */}
           <button
             onClick={() => setIsControlsCollapsed(!isControlsCollapsed)}
-            className="p-1 rounded hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800 transition-all"
+            className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-all cursor-pointer"
             title={isControlsCollapsed ? "Expand controls" : "Collapse controls"}
           >
             {isControlsCollapsed ? (
@@ -620,37 +667,37 @@ function CanvasInner({
 
           {!isControlsCollapsed && (
             <>
-              <div className="h-4 w-[1px] bg-neutral-200" />
+              <div className="h-4 w-[1px] bg-white/10" />
               
               {/* Zoom In */}
               <button
                 onClick={() => zoomIn()}
-                className="p-1 rounded hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800 transition-all"
+                className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-all cursor-pointer"
                 title="Zoom In"
               >
                 <Plus className="h-4 w-4" />
               </button>
 
               {/* Zoom Percentage */}
-              <span className="text-xs font-semibold text-neutral-600 min-w-[36px] text-center select-none">
+              <span className="text-xs font-mono font-bold text-neutral-300 min-w-[36px] text-center select-none">
                 {Math.round(zoom * 100)}%
               </span>
 
               {/* Zoom Out */}
               <button
                 onClick={() => zoomOut()}
-                className="p-1 rounded hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800 transition-all"
+                className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-all cursor-pointer"
                 title="Zoom Out"
               >
                 <Minus className="h-4 w-4" />
               </button>
 
-              <div className="h-4 w-[1px] bg-neutral-200" />
+              <div className="h-4 w-[1px] bg-white/10" />
 
               {/* Fit View */}
               <button
                 onClick={() => fitView()}
-                className="p-1 rounded hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800 transition-all"
+                className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-all cursor-pointer"
                 title="Fit View"
               >
                 <Maximize2 className="h-4 w-4" />
@@ -659,10 +706,8 @@ function CanvasInner({
               {/* Viewport Interaction Lock */}
               <button
                 onClick={() => setIsLocked(!isLocked)}
-                className={`p-1 rounded transition-all ${
-                  isLocked 
-                    ? "bg-red-50 text-red-500 hover:bg-red-100" 
-                    : "hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800"
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                  isLocked ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-neutral-400 hover:text-white hover:bg-white/10"
                 }`}
                 title={isLocked ? "Unlock Viewport" : "Lock Viewport"}
               >
@@ -676,16 +721,15 @@ function CanvasInner({
               {/* Toggle MiniMap */}
               <button
                 onClick={() => setShowMiniMap(!showMiniMap)}
-                className={`p-1 rounded transition-all ${
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                   showMiniMap 
-                    ? "bg-blue-50 text-blue-600 hover:bg-blue-100" 
-                    : "hover:bg-neutral-50 text-neutral-500 hover:text-neutral-800"
+                    ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" 
+                    : "text-neutral-400 hover:text-white hover:bg-white/10"
                 }`}
                 title={showMiniMap ? "Hide MiniMap" : "Show MiniMap"}
               >
                 <Map className="h-4 w-4" />
               </button>
-
               {/* Move/Pan Mode Indicator */}
               <div 
                 className="p-1 text-neutral-400 cursor-default select-none"

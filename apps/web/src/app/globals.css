@@ -1,4 +1,3 @@
-@import url('https://cdn.jsdelivr.net/fontsource/fonts/google-sans-flex@latest/latin-wght-normal.css');
 @import "tailwindcss";
 
 /* Base styles / Dark mode values */
@@ -30,6 +29,17 @@ body {
   z-index: 50 !important;
   cursor: crosshair !important;
   pointer-events: all !important;
+}
+
+/* Sharp Canvas Grid Line Styling */
+.react-flow__background pattern path,
+.react-flow__background-pattern path,
+.react-flow__background path,
+.react-flow__background pattern line,
+.react-flow__background-pattern line {
+  stroke: #64748b !important;
+  stroke-width: 1.2px !important;
+  stroke-opacity: 0.8 !important;
 }
 
 .react-flow__handle:hover {
