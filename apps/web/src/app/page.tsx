@@ -42,12 +42,6 @@ export default function KreaExactLandingPage() {
       image: "/web+trigger+email.png",
       action: "Build pipeline",
     },
-    {
-      title: "AES-128 Encrypted Vault",
-      prompt: "Store secrets → AES-128 encrypt → secure workflow execution",
-      image: "/aes128.png",
-      action: "Explore security",
-    },
   ];
 
   return (
@@ -188,44 +182,37 @@ export default function KreaExactLandingPage() {
       </div>
 
       {/* ── Section 1: Showcase Cards ──────────────────────────────────────── */}
-      <section className="py-20 bg-white text-black">
-        <div className="max-w-[1400px] mx-auto px-6 overflow-hidden">
-          <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-none">
+      <section className="py-16 bg-black text-white">
+        <div className="max-w-[1600px] mx-auto px-6 overflow-hidden">
+          <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none">
             {showcaseCards.map((card, idx) => (
               <div
                 key={idx}
-                className="shrink-0 w-[288px] sm:w-[370px] lg:w-[390px] h-[500px] relative rounded-[32px] overflow-hidden group bg-neutral-900 shadow-xl cursor-pointer"
+                className="shrink-0 w-[340px] sm:w-[440px] lg:w-[480px] bg-black cursor-pointer group"
               >
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
+                {/* Image — full width, no rounding */}
+                <div className="w-full overflow-hidden">
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    className="w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                </div>
 
-                <div className="relative bg-[linear-gradient(to_top,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0)_55%)] flex flex-col h-full w-full z-20 p-6 sm:p-8 justify-between">
-                  <div>
-                    <CheckCircle2 className="w-6 h-6 text-white" />
+                {/* Text below image */}
+                <div className="pt-4 pb-2 space-y-1">
+                  <div className="text-neutral-500 text-[10px] font-bold tracking-[2px] uppercase">
+                    PROMPT
                   </div>
-
-                  <div>
-                    <div className="transform group-hover:-translate-y-3 transition-transform duration-300">
-                      <div className="text-white/60 text-xs font-medium tracking-[1.2px] uppercase pb-2">
-                        PROMPT
-                      </div>
-                      <p className="text-white text-base sm:text-xl font-medium tracking-tight leading-snug">
-                        &ldquo;{card.prompt}&rdquo;
-                      </p>
-                    </div>
-
-                    <div className="overflow-hidden transition-[max-height,opacity,transform] duration-300 max-h-12 opacity-100 mt-4 sm:max-h-0 sm:opacity-0 sm:group-hover:max-h-12 sm:group-hover:opacity-100">
-                      <button
-                        onClick={() => setIsAuthModalOpen(true)}
-                        className="inline-flex items-center justify-center bg-neutral-800 hover:bg-neutral-700 text-white text-[13px] font-medium px-5 py-3 rounded-lg transition-colors cursor-pointer"
-                      >
-                        {card.action}
-                      </button>
-                    </div>
-                  </div>
+                  <p className="text-white text-sm sm:text-base font-medium leading-snug">
+                    &ldquo;{card.prompt}&rdquo;
+                  </p>
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="mt-2 inline-flex items-center gap-1.5 text-neutral-400 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    {card.action} →
+                  </button>
                 </div>
               </div>
             ))}
