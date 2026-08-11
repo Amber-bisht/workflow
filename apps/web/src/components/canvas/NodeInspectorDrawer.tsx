@@ -580,7 +580,7 @@ export default function NodeInspectorDrawer() {
                   }}
                   className="w-full bg-[#121215] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 font-medium"
                 >
-                  <option value="">Default NextFlow Service (System Environment Key)</option>
+                  <option value="">Default Service (System Environment Key)</option>
                   {workflowSecrets.length > 0 && (
                     <optgroup label="Workflow Secrets">
                       {workflowSecrets.map((s) => (

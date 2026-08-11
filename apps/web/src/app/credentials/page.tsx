@@ -236,7 +236,7 @@ export default function CredentialsPage() {
                   </div>
 
                   <p className="text-[10px] text-neutral-500 leading-tight">
-                    💡 Optional: NextFlow uses default bot <strong className="text-neutral-300">@NextFlowAlertsBot</strong> if no key is saved.
+                    💡 Optional: Default system bot used if no key is saved.
                   </p>
 
                   <button
@@ -304,7 +304,7 @@ export default function CredentialsPage() {
                   </div>
 
                   <p className="text-[10px] text-neutral-500 leading-tight">
-                    💡 Optional: NextFlow sends from <strong className="text-neutral-300">notifications@amberbisht.me</strong> by default.
+                    💡 Optional: Sends from <strong className="text-neutral-300">notifications@amberbisht.me</strong> by default.
                   </p>
 
                   <button

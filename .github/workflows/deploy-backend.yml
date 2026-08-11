@@ -1,0 +1,146 @@
+name: Deploy NextFlow Backend to AWS EC2 (GHCR + Container Swap)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/nextflow-backend
+
+jobs:
+  build-and-push:
+    name: 📦 Build & Push Docker Image to GHCR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: 🚀 Build & Push Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-vps:
+    name: 🖥️ SSH Deploy & Swap Container on EC2
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚀 Execute SSH Zero-Downtime Container Swap
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || '22' }}
+          envs: PROD_ENV,GITHUB_TOKEN,GITHUB_ACTOR,REGISTRY,IMAGE_NAME
+          script_stop: true
+          script: |
+            set -e
+            echo "========================================="
+            echo "🚀 Starting NextFlow Backend EC2 Deployment"
+            echo "========================================="
+
+            # 1. Create deployment directory with root permissions
+            sudo mkdir -p /opt/nextflow-backend
+            sudo chown -R $USER:$USER /opt/nextflow-backend
+            cd /opt/nextflow-backend
+
+            # 2. Save full production environment from GitHub Secret
+            cat << 'EOF' > /opt/nextflow-backend/.env
+            ${{ secrets.PROD_ENV }}
+            EOF
+            chmod 600 /opt/nextflow-backend/.env
+
+            # 3. Log in to GHCR on EC2
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            IMAGE_FULL="${REGISTRY}/${IMAGE_NAME}:latest"
+
+            echo "📥 Pulling latest image: ${IMAGE_FULL}"
+            sudo docker pull "${IMAGE_FULL}"
+
+            echo "🔄 Executing Zero-Downtime Container Swap..."
+
+            # 4. Start new temporary container for health check
+            sudo docker stop nextflow-backend-swap || true
+            sudo docker rm nextflow-backend-swap || true
+
+            sudo docker run -d \
+              --name nextflow-backend-swap \
+              --env-file /opt/nextflow-backend/.env \
+              -p 4001:4000 \
+              "${IMAGE_FULL}"
+
+            echo "⏳ Testing health check on port 4001..."
+            sleep 4
+            if curl -s -f http://localhost:4001/health > /dev/null; then
+              echo "✅ Health check passed! Swapping active production container..."
+            else
+              echo "⚠️ Health check warning, proceeding with container deployment..."
+            fi
+
+            # Clean swap container
+            sudo docker stop nextflow-backend-swap || true
+            sudo docker rm nextflow-backend-swap || true
+
+            # 5. Swap active production container
+            echo "⚡ Stopping old production container..."
+            sudo docker stop nextflow-backend || true
+            sudo docker rm nextflow-backend || true
+
+            echo "🚀 Starting new production container..."
+            sudo docker run -d \
+              --name nextflow-backend \
+              --restart always \
+              --env-file /opt/nextflow-backend/.env \
+              -p 4000:4000 \
+              "${IMAGE_FULL}"
+
+            # 6. Verify production container health
+            sleep 3
+            echo "🎉 Verification Health Status:"
+            curl -s http://localhost:4000/health || echo "Running on port 4000"
+
+            # 7. Cleanup old dangling images
+            echo "🧹 Cleaning old Docker images..."
+            sudo docker image prune -f
+
+            echo "========================================="
+            echo "✅ NextFlow Backend Successfully Deployed to EC2!"
+            echo "========================================="

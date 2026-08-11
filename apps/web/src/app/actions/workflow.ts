@@ -333,7 +333,7 @@ export async function testTelegramConnection(chatId: string, secretTag?: string)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: candidate,
-          text: "👋 Hello World! Your Telegram Chat is successfully connected to NextFlow Automation.",
+          text: "👋 Hello World! Your Telegram Chat is successfully connected to automation.amberbisht.me.",
         }),
       });
 
@@ -419,8 +419,8 @@ export async function testResendEmailConnection(toEmail: string, secretTag?: str
       body: JSON.stringify({
         from: process.env.RESEND_FROM_EMAIL || "notifications@amberbisht.me",
         to: [toEmail.trim()],
-        subject: "⚡ NextFlow Test Ping: Email Connection Verified",
-        html: "<p>👋 Hello World!</p><p>Your Resend Email service is successfully connected to <strong>NextFlow Automation</strong>.</p>",
+        subject: "⚡ Test Ping: Email Connection Verified",
+        html: "<p>👋 Hello World!</p><p>Your Resend Email service is successfully connected to <strong>automation.amberbisht.me</strong>.</p>",
       }),
     });
 

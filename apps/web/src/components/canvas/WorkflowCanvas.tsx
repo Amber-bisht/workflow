@@ -1,28 +1,28 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { 
-  ReactFlow, 
-  Background, 
+import {
+  ReactFlow,
+  Background,
   BackgroundVariant,
-  Controls, 
-  MiniMap, 
-  ReactFlowProvider, 
+  Controls,
+  MiniMap,
+  ReactFlowProvider,
   useReactFlow,
   useViewport,
   Panel
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-import { 
-  Undo2, 
-  Redo2, 
-  Plus, 
-  Play, 
-  Download, 
-  Upload, 
-  History, 
-  ArrowLeft, 
+import {
+  Undo2,
+  Redo2,
+  Plus,
+  Play,
+  Download,
+  Upload,
+  History,
+  ArrowLeft,
   Settings2,
   ZoomIn,
   ZoomOut,
@@ -81,25 +81,25 @@ interface WorkflowCanvasProps {
   initialRuns: any[];
 }
 
-function CanvasInner({ 
-  workflowId, 
-  initialName, 
-  initialNodes, 
-  initialEdges, 
-  initialRuns 
+function CanvasInner({
+  workflowId,
+  initialName,
+  initialNodes,
+  initialEdges,
+  initialRuns
 }: WorkflowCanvasProps) {
-  const { 
-    nodes, 
-    edges, 
+  const {
+    nodes,
+    edges,
     setWorkflowId,
     viewMode,
     setViewMode,
     selectedNodeId,
     setSelectedNodeId,
-    setNodes, 
-    setEdges, 
-    onNodesChange, 
-    onEdgesChange, 
+    setNodes,
+    setEdges,
+    onNodesChange,
+    onEdgesChange,
     onConnect,
     undo,
     redo,
@@ -217,7 +217,7 @@ function CanvasInner({
 
         // Update run status
         setRunStatus(runData.status);
-        
+
         // Update nodes output data to show visual feedback inline
         if (runData.nodesData?.nodes) {
           setNodes(runData.nodesData.nodes);
@@ -304,7 +304,7 @@ function CanvasInner({
       if (data.success && data.runId) {
         setActiveRunId(data.runId);
         fetchCredits();
-        
+
         const mockRun = {
           id: data.runId,
           status: "PENDING",
@@ -380,18 +380,15 @@ function CanvasInner({
     if (source === target) return false;
     // DAG: no cycles
     if (wouldCycle(edges, source, target)) {
-      console.warn("[NextFlow] Connection rejected: would create a cycle");
       return false;
     }
     const sh = sourceHandle || "";
     const th = targetHandle || "";
     // Type guard: image → text or text → image rejected
     if (isImageHandle(sh) && isTextHandle(th)) {
-      console.warn("[NextFlow] Connection rejected: image output → text input");
       return false;
     }
     if (isTextHandle(sh) && isImageHandle(th)) {
-      console.warn("[NextFlow] Connection rejected: text output → image input");
       return false;
     }
     return true;
@@ -490,9 +487,8 @@ function CanvasInner({
   return (
     <div className="flex h-screen w-screen bg-white text-neutral-900 overflow-hidden relative">
       {/* Upper Panel / Navigation Header Layout Wrapper */}
-      <header className={`absolute top-4 left-4 z-40 flex items-center justify-between gap-6 pointer-events-none transition-all duration-300 ${
-        isSidebarOpen ? "right-[376px]" : "right-4"
-      }`}>
+      <header className={`absolute top-4 left-4 z-40 flex items-center justify-between gap-6 pointer-events-none transition-all duration-300 ${isSidebarOpen ? "right-[376px]" : "right-4"
+        }`}>
         {/* Left Floating Card: Back Button & Workflow Name */}
         <div className="bg-neutral-900/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-2xl text-white pointer-events-auto">
           <Link
@@ -561,11 +557,10 @@ function CanvasInner({
           {/* Toggle MiniMap button */}
           <button
             onClick={() => setShowMiniMap(!showMiniMap)}
-            className={`p-2 rounded-xl border transition-all cursor-pointer ${
-              showMiniMap
-                ? "bg-blue-600 border-blue-500 text-white shadow-md"
-                : "border-white/10 text-neutral-400 hover:text-white hover:bg-white/10"
-            }`}
+            className={`p-2 rounded-xl border transition-all cursor-pointer ${showMiniMap
+              ? "bg-blue-600 border-blue-500 text-white shadow-md"
+              : "border-white/10 text-neutral-400 hover:text-white hover:bg-white/10"
+              }`}
             title={showMiniMap ? "Hide MiniMap" : "View MiniMap"}
           >
             <Map className="h-4 w-4" />
@@ -574,11 +569,10 @@ function CanvasInner({
           {/* Toggle sidebar button */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`p-2 rounded-xl border transition-all cursor-pointer ${
-              isSidebarOpen
-                ? "bg-blue-600 border-blue-500 text-white shadow-md"
-                : "border-white/10 text-neutral-400 hover:text-white hover:bg-white/10"
-            }`}
+            className={`p-2 rounded-xl border transition-all cursor-pointer ${isSidebarOpen
+              ? "bg-blue-600 border-blue-500 text-white shadow-md"
+              : "border-white/10 text-neutral-400 hover:text-white hover:bg-white/10"
+              }`}
             title="Execution History"
           >
             <History className="h-4 w-4" />
@@ -737,7 +731,7 @@ function CanvasInner({
           {!isControlsCollapsed && (
             <>
               <div className="h-4 w-[1px] bg-white/10" />
-              
+
               {/* Zoom In */}
               <button
                 onClick={() => zoomIn()}
@@ -775,9 +769,8 @@ function CanvasInner({
               {/* Viewport Interaction Lock */}
               <button
                 onClick={() => setIsLocked(!isLocked)}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  isLocked ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-neutral-400 hover:text-white hover:bg-white/10"
-                }`}
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${isLocked ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-neutral-400 hover:text-white hover:bg-white/10"
+                  }`}
                 title={isLocked ? "Unlock Viewport" : "Lock Viewport"}
               >
                 {isLocked ? (
@@ -788,7 +781,7 @@ function CanvasInner({
               </button>
 
               {/* Move/Pan Mode Indicator */}
-              <div 
+              <div
                 className="p-1 text-neutral-400 cursor-default select-none"
                 title={isLocked ? "Viewport locked" : "Pan mode active"}
               >

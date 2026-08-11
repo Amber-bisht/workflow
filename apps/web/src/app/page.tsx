@@ -132,7 +132,7 @@ export default function KreaExactLandingPage() {
           {/* Hero Image */}
           <img
             src="/hero.png"
-            alt="NextFlow AI Workflow Canvas"
+            alt="automation.amberbisht.me AI Workflow Canvas"
             className="absolute inset-0 z-0 w-full h-full object-cover [object-position:center_70%] pointer-events-none select-none"
           />
 
@@ -149,7 +149,7 @@ export default function KreaExactLandingPage() {
           {/* Hero Content */}
           <div className="relative z-20 mx-auto flex flex-col items-center max-w-[980px] -translate-y-2 sm:-translate-y-4">
             <h1
-              aria-label="NextFlow — Build AI workflows visually. Run them anywhere."
+              aria-label="automation.amberbisht.me — Build AI workflows visually. Run them anywhere."
               className="text-[#f5f5f5] text-center max-w-[960px]"
               style={{
                 fontSize: "clamp(32px, 5.5vw, 56px)",

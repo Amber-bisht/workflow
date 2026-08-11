@@ -37,14 +37,20 @@ import { workflowSecretsRouter } from "./controllers/workflowSecretsController";
 const app = new Hono();
 
 // Enable CORS for Next.js frontend and production domain
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:8080",
+  "http://automation.amberbisht.me",
+  "https://automation.amberbisht.me",
+];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:8080",
-      "https://automation.amberbisht.me",
-    ],
+    origin: allowedOrigins,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "x-user-id"],
     credentials: true,
