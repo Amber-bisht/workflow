@@ -225,58 +225,57 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
         <div className="max-w-7xl mx-auto space-y-10">
 
           {/* Top Header */}
-          <AppHeader
-            title="Workflows"
-            subtitle="Build visual AI node graphs, connect APIs, and inspect execution logs."
-            badgeText="Dashboard"
-          >
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-white/10 hover:border-white/20 text-neutral-200 text-xs font-semibold rounded-full transition-all cursor-pointer"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              Import Layout
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImport}
-              accept=".json"
-              className="hidden"
-            />
-
-            <button
-              onClick={() => setIsCreateOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-2 bg-white text-black font-semibold text-xs rounded-full hover:bg-neutral-200 transition-all cursor-pointer shadow-md active:scale-95"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              New Workflow
-            </button>
-          </AppHeader>
-
-
-
-          {/* User Workflows List Section */}
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">Your Canvas Workflows</h3>
-                <p className="text-neutral-500 text-xs mt-0.5">
-                  Select a workflow to edit nodes or view execution history.
-                </p>
-              </div>
-
-              {/* Search Bar */}
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+          <AppHeader title="Workflows">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="relative w-48 sm:w-60">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
                 <input
                   type="text"
                   placeholder="Search workflows..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-neutral-900 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white/30 transition-all"
+                  className="w-full bg-neutral-900 border border-white/10 rounded-full py-1.5 pl-9 pr-3.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white/30 transition-all"
                 />
               </div>
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-neutral-900 border border-white/10 hover:border-white/20 text-neutral-200 text-xs font-semibold rounded-full transition-all cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                Import Layout
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImport}
+                accept=".json"
+                className="hidden"
+              />
+
+              <button
+                onClick={() => setIsCreateOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-1.5 bg-white text-black font-semibold text-xs rounded-full hover:bg-neutral-200 transition-all cursor-pointer shadow-md active:scale-95"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New Workflow
+              </button>
+            </div>
+          </AppHeader>
+
+          {/* Feature Banner Image */}
+          <div className="w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-neutral-900/50 h-44 sm:h-56 md:h-64 relative">
+            <img
+              src="/lets.png"
+              alt="Workflow Canvas Overview"
+              className="w-full h-full object-cover object-center"
+            />
+          </div>
+
+          {/* User Workflows List Section */}
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h3 className="text-lg font-bold text-white tracking-tight">Your Canvas Workflows</h3>
             </div>
 
             {/* Grid */}

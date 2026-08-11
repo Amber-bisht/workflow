@@ -46,19 +46,7 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto space-y-8 pb-16">
           
           {/* Header */}
-          <AppHeader
-            title="My Profile"
-            subtitle="Manage your user credentials, security details, and subscription links."
-            badgeText="Account Settings"
-          >
-            <Link
-              href="/billing"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/20 transition-all cursor-pointer"
-            >
-              <CreditCard className="w-3.5 h-3.5" />
-              <span>Billing & Plans</span>
-            </Link>
-          </AppHeader>
+          <AppHeader title="My Profile" />
 
           {/* User Avatar & Name Banner */}
           <div className="rounded-3xl border border-white/10 bg-gradient-to-r from-neutral-900 via-neutral-900 to-blue-950/40 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-2xl relative overflow-hidden">

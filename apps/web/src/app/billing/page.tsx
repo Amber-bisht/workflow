@@ -240,20 +240,8 @@ export default function BillingPage() {
       <main className="flex-1 h-full overflow-y-auto p-6 sm:p-10">
         <div className="max-w-6xl mx-auto space-y-10 pb-16">
 
-          {/* Page Title & Refresh */}
-          <AppHeader
-            title="Credit Balance & Plans"
-            subtitle="Manage your execution credits, top up via Razorpay, or review node deduction rates."
-            badgeText="Billing & Subscriptions"
-          >
-            <button
-              onClick={fetchCredits}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-neutral-900 text-neutral-300 hover:text-white hover:bg-white/10 text-xs font-semibold transition-all cursor-pointer"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loadingCredits ? "animate-spin" : ""}`} />
-              <span>Refresh Balance</span>
-            </button>
-          </AppHeader>
+          {/* Page Title */}
+          <AppHeader title="Billing & Plans" />
 
           {/* Credit Balance & Usage Overview Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
