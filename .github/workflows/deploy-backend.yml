@@ -9,7 +9,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/nextflow-backend
 
 jobs:
   build-and-push:
@@ -19,12 +18,14 @@ jobs:
       contents: read
       packages: write
 
-    outputs:
-      image_tag: ${{ steps.meta.outputs.tags }}
-
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
+
+      - name: 🏷️ Set Lowercase Image Name
+        run: |
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_NAME=${OWNER_LOWER}/nextflow-backend" >> $GITHUB_ENV
 
       - name: 🛠️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -68,7 +69,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || '22' }}
-          envs: PROD_ENV,GITHUB_TOKEN,GITHUB_ACTOR,REGISTRY,IMAGE_NAME
+          envs: PROD_ENV,GITHUB_TOKEN,GITHUB_ACTOR,REGISTRY
           script_stop: true
           script: |
             set -e
@@ -76,28 +77,30 @@ jobs:
             echo "🚀 Starting NextFlow Backend EC2 Deployment"
             echo "========================================="
 
-            # 1. Create deployment directory with root permissions
+            # 1. Ensure lowercase image name
+            OWNER_LOWER=$(echo "${GITHUB_ACTOR}" | tr '[:upper:]' '[:lower:]')
+            IMAGE_FULL="ghcr.io/${OWNER_LOWER}/nextflow-backend:latest"
+
+            # 2. Create deployment directory with root permissions
             sudo mkdir -p /opt/nextflow-backend
             sudo chown -R $USER:$USER /opt/nextflow-backend
             cd /opt/nextflow-backend
 
-            # 2. Save full production environment from GitHub Secret
+            # 3. Save full production environment from GitHub Secret
             cat << 'EOF' > /opt/nextflow-backend/.env
             ${{ secrets.PROD_ENV }}
             EOF
             chmod 600 /opt/nextflow-backend/.env
 
-            # 3. Log in to GHCR on EC2
-            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
-            IMAGE_FULL="${REGISTRY}/${IMAGE_NAME}:latest"
+            # 4. Log in to GHCR on EC2
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
 
             echo "📥 Pulling latest image: ${IMAGE_FULL}"
             sudo docker pull "${IMAGE_FULL}"
 
             echo "🔄 Executing Zero-Downtime Container Swap..."
 
-            # 4. Start new temporary container for health check
+            # 5. Start new temporary container for health check
             sudo docker stop nextflow-backend-swap || true
             sudo docker rm nextflow-backend-swap || true
 
@@ -119,7 +122,7 @@ jobs:
             sudo docker stop nextflow-backend-swap || true
             sudo docker rm nextflow-backend-swap || true
 
-            # 5. Swap active production container
+            # 6. Swap active production container
             echo "⚡ Stopping old production container..."
             sudo docker stop nextflow-backend || true
             sudo docker rm nextflow-backend || true
@@ -132,12 +135,12 @@ jobs:
               -p 4000:4000 \
               "${IMAGE_FULL}"
 
-            # 6. Verify production container health
+            # 7. Verify production container health
             sleep 3
             echo "🎉 Verification Health Status:"
             curl -s http://localhost:4000/health || echo "Running on port 4000"
 
-            # 7. Cleanup old dangling images
+            # 8. Cleanup old dangling images
             echo "🧹 Cleaning old Docker images..."
             sudo docker image prune -f
 
