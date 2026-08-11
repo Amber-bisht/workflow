@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import {
@@ -204,7 +204,23 @@ export default function KreaExactLandingPage() {
             {showcaseCards.map((card, idx) => (
               <div
                 key={idx}
-                className="shrink-0 w-[340px] sm:w-[440px] lg:w-[480px] bg-black cursor-pointer group"
+                className="shrink-0 w-[340px] sm:w-[440px] lg:w-[480px] bg-black cursor-pointer group
+                  opacity-0 translate-y-8 transition-all duration-700 ease-out
+                  [&.in-view]:opacity-100 [&.in-view]:translate-y-0"
+                style={{ transitionDelay: `${idx * 120}ms` }}
+                ref={(el) => {
+                  if (!el) return;
+                  const obs = new IntersectionObserver(
+                    ([entry]) => {
+                      if (entry.isIntersecting) {
+                        el.classList.add("in-view");
+                        obs.disconnect();
+                      }
+                    },
+                    { threshold: 0.15 }
+                  );
+                  obs.observe(el);
+                }}
               >
                 {/* Image — full width, no rounding */}
                 <div className="w-full overflow-hidden">
