@@ -47,7 +47,7 @@ export async function createWorkflow(name: string, description?: string) {
       deletable: false,
       data: {
         fields: [
-          { id: "text_field", name: "text_field", type: "text", value: "Product: Wireless Bluetooth Headphones. Features: Noise cancellation, 30-hour battery, foldable design." },
+          { id: "text_field", name: "text_field", type: "text", value: "Enter prompt or input text..." },
           { id: "image_field", name: "image_field", type: "image", value: "" },
         ],
       },
