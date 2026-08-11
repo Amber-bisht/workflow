@@ -31,25 +31,25 @@ export default function AppHeader({ title, subtitle, badgeText = "Dashboard", ch
   }, [user?.id]);
 
   return (
-    <div className="flex items-center justify-between flex-wrap gap-4 border-b border-white/10 pb-6 mb-8">
+    <div className="flex items-center justify-between flex-wrap gap-4 border-b border-white/10 pb-5 mb-8">
       <div>
-        <span className="text-[11px] font-bold font-mono text-neutral-500 uppercase tracking-widest">
+        <span className="text-[10px] font-bold font-mono text-neutral-500 uppercase tracking-widest">
           {badgeText}
         </span>
-        <h1 className="text-3xl font-bold tracking-tight text-white mt-1">
+        <h1 className="text-2xl font-bold tracking-tight text-white mt-0.5">
           {title}
         </h1>
-        {subtitle && <p className="text-neutral-400 text-xs sm:text-sm mt-1">{subtitle}</p>}
+        {subtitle && <p className="text-neutral-400 text-xs mt-0.5">{subtitle}</p>}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {/* Quick Credit Badge */}
         <Link
           href="/billing"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-bold font-mono transition-all cursor-pointer shadow-sm active:scale-95"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-bold font-mono transition-all cursor-pointer shadow-sm active:scale-95"
           title="View Credit Balance & Plans"
         >
-          <Zap className="w-4 h-4 text-amber-400" />
+          <Zap className="w-3.5 h-3.5 text-amber-400" />
           <span>{credits !== null ? `${credits} Credits` : "100 Credits"}</span>
         </Link>
 
