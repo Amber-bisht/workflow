@@ -6,7 +6,16 @@ import {
   CheckCircle2,
   Menu,
   X,
-  ArrowRight
+  ArrowRight,
+  Bot,
+  Sparkles,
+  Zap,
+  Search,
+  Send,
+  Mail,
+  Image as ImageIcon,
+  Activity,
+  Brain
 } from "lucide-react";
 import AuthModal from "@/components/AuthModal";
 
@@ -14,42 +23,42 @@ export default function KreaExactLandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Showcase Cards with Prompt & Image Assets
+  // Showcase Cards — real workflow examples
   const showcaseCards = [
     {
-      title: "Cinematic Photorealism",
-      prompt: "“Cinematic photo of a Women ”",
-      image: "/assets/landingPhotorealExamplePortrait.webp",
-      badge: "Photoreal",
-      action: "Generate image",
+      title: "AI Research Pipeline",
+      prompt: "“Search web → summarise with GPT-4o → Telegram alert”",
+      image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=80&auto=format&fit=crop",
+      badge: "Workflow",
+      action: "Build this",
     },
     {
-      title: "AI Video Motion",
-      prompt: "“Portrait with animated capybara talking about automation”",
-      image: "/assets/80afb2b863333a10da2db7491ef56cab.jpg",
-      badge: "Motion",
-      action: "Generate video",
+      title: "Smart Website Monitor",
+      prompt: "“Monitor uptime → detect change → notify on failure”",
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80&auto=format&fit=crop",
+      badge: "Monitoring",
+      action: "Try monitor",
     },
     {
-      title: "8K Ultra Upscaler",
-      prompt: "“Upscale image 512p -> 8K”",
-      image: "/assets/e9d66bd59ef5adefe928e5fb0298cb66.jpg",
-      badge: "Enhance",
-      action: "Upscale image",
+      title: "Image Crop & CDN Upload",
+      prompt: "“Upload → AI crop → ImageKit CDN store”",
+      image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=600&q=80&auto=format&fit=crop",
+      badge: "Vision",
+      action: "Build pipeline",
     },
     {
-      title: "Layer Explosion",
-      prompt: "“Advertisement shot of a sandwich vertically exploding into different layers”",
-      image: "/assets/9098912c68944c798e511f4d06b4a9b0.jpg",
-      badge: "Animation",
-      action: "Animate image",
+      title: "LLM Email Responder",
+      prompt: "“Trigger → OpenRouter LLM → auto-reply via Resend”",
+      image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80&auto=format&fit=crop",
+      badge: "Automation",
+      action: "Create workflow",
     },
     {
-      title: "Offroad Desert Race",
-      prompt: "“Dramatic photo of an old offroad truck racing through the desert”",
-      image: "/assets/b87be2638aa0dd26622549e9ee274afc.jpg",
-      badge: "Cinema",
-      action: "Generate image",
+      title: "Multi-Model AI Chain",
+      prompt: "“Input → Claude analysis → Gemini review → output”",
+      image: "https://images.unsplash.com/photo-1686191128892-3b37add4c844?w=600&q=80&auto=format&fit=crop",
+      badge: "AI Chain",
+      action: "Start building",
     },
   ];
 
@@ -133,7 +142,7 @@ export default function KreaExactLandingPage() {
           {/* Hero Content - Shifted UP for perfect visual alignment */}
           <div className="relative z-20 mx-auto flex flex-col items-center max-w-[980px] -translate-y-2 sm:-translate-y-4">
             <h1
-              aria-label="automation.amberbisht.me is the world's most powerful creative AI suite."
+              aria-label="NextFlow — Build AI workflows visually. Run them anywhere."
               className="text-[#f5f5f5] text-center max-w-[960px] margin-0"
               style={{
                 fontSize: "clamp(32px, 5.5vw, 56px)",
@@ -144,7 +153,7 @@ export default function KreaExactLandingPage() {
                 fontFamily: '"Suisse Intl", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               }}
             >
-              automation.amberbisht.me is the world&apos;s<br />most powerful creative AI suite.
+              Build AI workflows visually.<br />Run them anywhere.
             </h1>
 
             <p
@@ -157,7 +166,7 @@ export default function KreaExactLandingPage() {
                 fontFamily: '"Suisse Intl", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               }}
             >
-              Generate, enhance, and edit images, videos, or 3D meshes for free with AI.
+              Chain LLMs, web search, image processing, email, Telegram and monitoring — all from a drag-and-drop node canvas.
             </p>
 
             <div className="flex items-center justify-center gap-[12px] mt-[22px] flex-wrap">
@@ -224,23 +233,34 @@ export default function KreaExactLandingPage() {
         </div>
       </section>
 
-      {/* ── Section 2: Model Badges ("The industry's best Generative AI models") ── */}
+      {/* ── Section 2: Node Badges with Tech Icons ── */}
       <section className="py-20 bg-neutral-950 text-white border-t border-neutral-900">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <span className="text-xs font-bold font-mono text-neutral-500 uppercase tracking-widest">
-            Unified Model Engine
+            Unified Node Engine
           </span>
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white mt-2">
-            The industry&apos;s best Generative AI models. In one subscription.
+            Every integration you need. In one workflow.
           </h2>
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-3 max-w-4xl mx-auto">
-            {["Veo 3.1", "Ideogram", "Runway", "Luma", "Flux", "Gemini 2.0", "OpenRouter", "GPT-4o", "Claude 3.5"].map((model, i) => (
+            {[
+              { name: "OpenRouter LLM", icon: <Brain className="w-4 h-4 text-purple-400" /> },
+              { name: "GPT-4o", icon: <Bot className="w-4 h-4 text-emerald-400" /> },
+              { name: "Claude 5", icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
+              { name: "Gemini 3.6", icon: <Zap className="w-4 h-4 text-blue-400" /> },
+              { name: "Tavily Search", icon: <Search className="w-4 h-4 text-cyan-400" /> },
+              { name: "Telegram", icon: <Send className="w-4 h-4 text-sky-400" /> },
+              { name: "Resend Email", icon: <Mail className="w-4 h-4 text-rose-400" /> },
+              { name: "ImageKit CDN", icon: <ImageIcon className="w-4 h-4 text-orange-400" /> },
+              { name: "Website Monitor", icon: <Activity className="w-4 h-4 text-green-400" /> },
+            ].map((item, i) => (
               <span
                 key={i}
-                className="px-5 py-2.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-sm font-semibold text-neutral-300 hover:border-neutral-700 hover:text-white transition-all cursor-default"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-sm font-semibold text-neutral-300 hover:border-neutral-700 hover:text-white transition-all cursor-default shadow-sm"
               >
-                {model}
+                {item.icon}
+                <span>{item.name}</span>
               </span>
             ))}
           </div>
@@ -250,24 +270,21 @@ export default function KreaExactLandingPage() {
       {/* ── Section 3: High-Impact Feature Banners ─────────────────────────────── */}
       <section className="py-24 bg-black text-white px-6 space-y-28 max-w-[1300px] mx-auto">
         
-        {/* Feature Banner 1: Realtime Canvas */}
+        {/* Feature Banner 1: Visual Node Canvas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <span className="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-300">
-              Realtime Canvas
-            </span>
             <h2 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.1]">
-              Draw and generate in real time.
+              Build logic with nodes, not code.
             </h2>
             <p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-md">
-              Every stroke updates the image instantly. Skip the rendering wait and stay in your creative flow.
+              Drag, drop, and wire nodes on a React Flow canvas. Undo/redo, export layouts, and run your entire workflow in one click.
             </p>
             <div className="pt-2">
               <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-2 bg-white text-black font-semibold text-sm px-6 py-3 rounded-full hover:bg-neutral-200 transition-all active:scale-95"
               >
-                <span>Try Realtime Canvas</span>
+                <span>Open Workflow Canvas</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -275,75 +292,64 @@ export default function KreaExactLandingPage() {
 
           <div className="relative rounded-[32px] overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl group">
             <img
-              src="/assets/realtimeBase.webp"
-              alt="Realtime Canvas Drawing"
+              src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=900&q=80&auto=format&fit=crop"
+              alt="Visual workflow node canvas"
               className="w-full h-[420px] object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-            />
-            <img
-              src="/assets/realtimeOverlay.png"
-              alt="Realtime Stroke Overlay"
-              className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none"
             />
           </div>
         </div>
 
-        {/* Feature Banner 2: Ultra Realistic Vision Engine */}
+        {/* Feature Banner 2: Multi-Model AI */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="relative rounded-[32px] overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl group order-2 lg:order-1">
             <div className="grid grid-cols-2 h-[420px]">
               <img
-                src="/assets/skinTexture.png"
-                alt="Skin Texture Detail"
+                src="https://images.unsplash.com/photo-1655720828018-edd2daec9349?w=600&q=80&auto=format&fit=crop"
+                alt="AI brain visualization"
                 className="w-full h-full object-cover border-r border-white/10 group-hover:scale-105 transition-transform duration-700"
               />
               <img
-                src="/assets/eye-macro.webp"
-                alt="Eye Macro Photorealism"
+                src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&q=80&auto=format&fit=crop"
+                alt="Neural network connections"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
             </div>
           </div>
 
           <div className="space-y-6 order-1 lg:order-2">
-            <span className="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-300">
-              Proprietary Engine
-            </span>
             <h2 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.1]">
-              automation — Our ultra-realistic image model.
+              Every frontier model. One node.
             </h2>
             <p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-md">
-              Our vision engine offers accurate skin textures, cinematic lighting, and high-fidelity photorealistic detail without synthetic artifacts.
+              The OpenRouter node gives you GPT-4o, Claude 3.5, Gemini 2.0, Llama, and Mistral — switch models with a single dropdown, no API key juggling.
             </p>
             <div className="pt-2">
               <button
                 onClick={() => setIsAuthModalOpen(true)}
                 className="inline-flex items-center gap-2 bg-white text-black font-semibold text-sm px-6 py-3 rounded-full hover:bg-neutral-200 transition-all active:scale-95 cursor-pointer"
               >
-                <span>Generate with Engine</span>
+                <span>Try LLM Node</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Feature Banner 3: 8K Enhancer & Upscaler */}
+        {/* Feature Banner 3: Monitoring & Alerts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <span className="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-300">
-              8K Enhancer
-            </span>
             <h2 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.1]">
-              Enhance and upscale photos to 8K.
+              Watch the web. Alert your team.
             </h2>
             <p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-md">
-              Transform low-resolution snapshots into crisp, publication-ready images in sub-second execution windows.
+              Connect a Website Monitor node to Telegram or Email — your workflow fires automatically when uptime drops or content changes are detected.
             </p>
             <div className="pt-2">
               <button
                 onClick={() => setIsAuthModalOpen(true)}
                 className="inline-flex items-center gap-2 bg-white text-black font-semibold text-sm px-6 py-3 rounded-full hover:bg-neutral-200 transition-all active:scale-95 cursor-pointer"
               >
-                <span>Upscale Image</span>
+                <span>Set up monitoring</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -351,8 +357,8 @@ export default function KreaExactLandingPage() {
 
           <div className="relative rounded-[32px] overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl group">
             <img
-              src="/assets/hf0.webp"
-              alt="8K Enhancer Result"
+              src="https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=900&q=80&auto=format&fit=crop"
+              alt="Monitoring dashboard"
               className="w-full h-[420px] object-cover group-hover:scale-105 transition-transform duration-700"
             />
           </div>
@@ -376,22 +382,22 @@ export default function KreaExactLandingPage() {
               </span>
             </div>
             <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">
-              The world&apos;s most powerful creative AI suite. Built with Next.js 16, Bun, Hono, OpenRouter Multimodal AI, Sharp, and ImageKit CDN.
+              Visual node-based AI workflow automation. Built with Next.js, Bun, Hono, OpenRouter, BullMQ, Tavily, and ImageKit CDN.
             </p>
           </div>
 
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Products</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Product</h4>
             <ul className="space-y-2 text-xs">
-              <li><Link href="/dashboard" className="hover:text-white transition-colors">App Studio</Link></li>
-              <li><button onClick={() => setIsAuthModalOpen(true)} className="hover:text-white transition-colors cursor-pointer">Image Generator</button></li>
-              <li><button onClick={() => setIsAuthModalOpen(true)} className="hover:text-white transition-colors cursor-pointer">Video Generator</button></li>
-              <li><button onClick={() => setIsAuthModalOpen(true)} className="hover:text-white transition-colors cursor-pointer">Enhancer & Upscaler</button></li>
+              <li><Link href="/dashboard" className="hover:text-white transition-colors">Workflow Canvas</Link></li>
+              <li><button onClick={() => setIsAuthModalOpen(true)} className="hover:text-white transition-colors cursor-pointer">Node Library</button></li>
+              <li><button onClick={() => setIsAuthModalOpen(true)} className="hover:text-white transition-colors cursor-pointer">Run History</button></li>
+              <li><button onClick={() => setIsAuthModalOpen(true)} className="hover:text-white transition-colors cursor-pointer">Monitoring & Alerts</button></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Resources</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Account</h4>
             <ul className="space-y-2 text-xs">
               <li><button onClick={() => setIsAuthModalOpen(true)} className="hover:text-white transition-colors cursor-pointer">Log In with Google</button></li>
               <li><button onClick={() => setIsAuthModalOpen(true)} className="hover:text-white transition-colors cursor-pointer">Sign Up Free</button></li>
@@ -400,7 +406,7 @@ export default function KreaExactLandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto pt-8 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
-          <div>© {new Date().getFullYear()} automation.amberbisht.me. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} NextFlow by amberbisht. All rights reserved.</div>
           <div className="flex gap-6">
             <span className="hover:text-neutral-400 cursor-pointer">Terms of Service</span>
             <span className="hover:text-neutral-400 cursor-pointer">Privacy Policy</span>
