@@ -31,15 +31,24 @@ body {
   pointer-events: all !important;
 }
 
-/* Sharp Canvas Grid Line Styling */
-.react-flow__background pattern path,
-.react-flow__background-pattern path,
-.react-flow__background path,
-.react-flow__background pattern line,
-.react-flow__background-pattern line {
-  stroke: #64748b !important;
-  stroke-width: 1.2px !important;
-  stroke-opacity: 0.8 !important;
+/* Single Unified Canvas Grid Background */
+.react-flow,
+.react-flow__renderer,
+.react-flow__viewport {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.react-flow__pane {
+  background-color: #ffffff !important;
+  background-image: 
+    linear-gradient(to right, #cbd5e1 1px, transparent 1px),
+    linear-gradient(to bottom, #cbd5e1 1px, transparent 1px) !important;
+  background-size: 28px 28px !important;
+}
+
+.react-flow__background {
+  display: none !important;
 }
 
 .react-flow__handle:hover {

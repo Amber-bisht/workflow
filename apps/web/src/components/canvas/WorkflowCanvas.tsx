@@ -458,7 +458,7 @@ function CanvasInner({
   };
 
   return (
-    <div className="flex h-screen w-screen bg-[#f8fafc] text-neutral-900 overflow-hidden relative">
+    <div className="flex h-screen w-screen bg-white text-neutral-900 overflow-hidden relative">
       {/* Upper Panel / Navigation Header Layout Wrapper */}
       <header className={`absolute top-4 left-4 z-40 flex items-center justify-between gap-6 pointer-events-none transition-all duration-300 ${
         isSidebarOpen ? "right-[376px]" : "right-4"
@@ -519,7 +519,7 @@ function CanvasInner({
       </header>
 
       {/* Main Canvas Area */}
-      <main className="flex-1 h-full w-full relative bg-[#f8fafc] bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] bg-[size:28px_28px]">
+      <main className="flex-1 h-full w-full relative bg-white">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -534,11 +534,7 @@ function CanvasInner({
           className="w-full h-full"
           panOnDrag={!isLocked}
           zoomOnScroll={!isLocked}
-          zoomOnPinch={!isLocked}
-          zoomOnDoubleClick={!isLocked}
-          preventScrolling={isLocked}
         >
-          <Background variant={BackgroundVariant.Lines} color="#94a3b8" gap={28} />
 
           {/* React Flow elements */}
           {showMiniMap && (
