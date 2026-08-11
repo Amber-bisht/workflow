@@ -10,13 +10,7 @@ import {
   CreditCard,
   Sparkles,
   Loader2,
-  Bot,
-  Mail,
-  Send,
-  Search,
-  Activity,
   RefreshCw,
-  User
 } from "lucide-react";
 import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/AppHeader";
@@ -26,66 +20,6 @@ declare global {
     Razorpay: any;
   }
 }
-
-const PRICING_PLANS = [
-  {
-    id: "free",
-    name: "Free",
-    price: "₹0",
-    period: "forever",
-    credits: "100 credits / mo",
-    description: "Ideal for exploring visual workflow graphs",
-    features: [
-      "100 free monthly credits",
-      "Unlimited visual workflows",
-      "OpenRouter LLM & Gemini nodes",
-      "Community support"
-    ],
-    cta: "Current Plan",
-    highlight: false,
-  },
-  {
-    id: "starter",
-    name: "Starter Top-up",
-    price: "₹99",
-    period: "one-time",
-    credits: "1,000 paid credits",
-    description: "Instant credit boost for active automation tasks",
-    features: [
-      "1,000 paid credits (never expire)",
-      "Tavily Web Search nodes",
-      "Telegram & Resend email alerts",
-      "Website uptime monitoring"
-    ],
-    cta: "Buy Starter Pack (₹99)",
-    highlight: true,
-  },
-  {
-    id: "pro",
-    name: "Pro Plan",
-    price: "₹499",
-    period: "/ month",
-    credits: "5,000 credits / mo",
-    description: "For power users building production automation",
-    features: [
-      "5,000 monthly credits",
-      "Priority execution queue",
-      "All 8+ node types included",
-      "Priority support & API keys vault"
-    ],
-    cta: "Upgrade to Pro (₹499)",
-    highlight: false,
-  },
-];
-
-const NODE_COSTS = [
-  { node: "OpenRouter / Gemini LLM", cost: "5 credits / run", icon: <Bot className="w-4 h-4 text-purple-400" /> },
-  { node: "Tavily Web Search", cost: "3 credits / search", icon: <Search className="w-4 h-4 text-cyan-400" /> },
-  { node: "Website Monitor", cost: "2 credits / check", icon: <Activity className="w-4 h-4 text-green-400" /> },
-  { node: "Telegram Alert", cost: "1 credit / message", icon: <Send className="w-4 h-4 text-sky-400" /> },
-  { node: "Resend Email", cost: "1 credit / email", icon: <Mail className="w-4 h-4 text-rose-400" /> },
-  { node: "Request Inputs / Response", cost: "0 credits (Free)", icon: <Zap className="w-4 h-4 text-amber-400" /> },
-];
 
 export default function BillingPage() {
   const { data: session, status } = useSession();
@@ -99,8 +33,23 @@ export default function BillingPage() {
     cycleStartDate?: string;
   } | null>(null);
 
+  const [plans, setPlans] = useState<any[]>([]);
   const [loadingCredits, setLoadingCredits] = useState(true);
+  const [loadingPlans, setLoadingPlans] = useState(true);
   const [purchasingPlan, setPurchasingPlan] = useState<string | null>(null);
+
+  // Fetch dynamic plans from backend API
+  useEffect(() => {
+    fetch("/api/billing/plans")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.plans)) {
+          setPlans(data.plans);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch plans from API:", err))
+      .finally(() => setLoadingPlans(false));
+  }, []);
 
   // Load user credit balance from backend
   const fetchCredits = async () => {
@@ -178,7 +127,7 @@ export default function BillingPage() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: "automation.amberbisht.me",
-        description: "1,000 Credits Starter Top-up",
+        description: "Credits Top-up",
         order_id: orderData.orderId,
         handler: async (response: any) => {
           try {
@@ -193,12 +142,13 @@ export default function BillingPage() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                planId,
               }),
             });
 
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-              alert("🎉 Payment Successful! 1,000 Credits added to your account.");
+              alert("🎉 Payment Successful! Credits added to your account.");
               fetchCredits();
             } else {
               alert("Payment verification failed: " + verifyData.error);
@@ -238,7 +188,7 @@ export default function BillingPage() {
 
       {/* ── Main Billing & Plans Panel ───────────────────────────────────────── */}
       <main className="flex-1 h-full overflow-y-auto p-6 sm:p-10">
-        <div className="max-w-6xl mx-auto space-y-10 pb-16">
+        <div className="max-w-6xl space-y-10 pb-16">
 
           {/* Page Title */}
           <AppHeader title="Billing & Plans" />
@@ -305,111 +255,93 @@ export default function BillingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-              {PRICING_PLANS.map((plan) => (
-                <div
-                  key={plan.id}
-                  className={`relative rounded-3xl border p-7 flex flex-col justify-between gap-6 transition-all duration-200 ${
-                    plan.highlight
-                      ? "bg-gradient-to-b from-blue-950/30 to-neutral-900 border-blue-500/40 shadow-[0_0_40px_rgba(59,130,246,0.12)] scale-[1.02]"
-                      : "bg-neutral-900/70 border-white/10"
-                  }`}
-                >
-                  {plan.highlight && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                      <span className="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
-                        Best Value
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-white tracking-tight">{plan.name}</h3>
-                      <p className="text-neutral-500 text-xs mt-1">{plan.description}</p>
-                    </div>
-
-                    <div className="flex items-end gap-1.5">
-                      <span className="text-4xl font-bold text-white tracking-tight">{plan.price}</span>
-                      <span className="text-neutral-500 text-xs mb-1.5">{plan.period}</span>
-                    </div>
-
-                    <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-full">
-                      <Zap className="w-3.5 h-3.5" />
-                      {plan.credits}
-                    </div>
-
-                    <div className="h-[1px] bg-white/10 my-4" />
-
-                    <ul className="space-y-2.5 text-xs">
-                      {plan.features.map((f, i) => (
-                        <li key={i} className="flex items-center gap-2 text-neutral-300">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="pt-4">
-                    {plan.id === "free" ? (
-                      <button
-                        disabled
-                        className="w-full py-3 rounded-full bg-white/5 border border-white/10 text-neutral-400 text-xs font-semibold cursor-default"
-                      >
-                        {plan.cta}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handlePayment(plan.id)}
-                        disabled={purchasingPlan !== null}
-                        className={`w-full py-3 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-95 ${
-                          plan.highlight
-                            ? "bg-blue-600 hover:bg-blue-500 text-white"
-                            : "bg-white hover:bg-neutral-200 text-black"
-                        }`}
-                      >
-                        {purchasingPlan === plan.id ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Initializing Razorpay...</span>
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="w-4 h-4" />
-                            <span>{plan.cta}</span>
-                          </>
-                        )}
-                      </button>
+            {loadingPlans ? (
+              <div className="flex justify-center p-12">
+                <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                {plans.map((plan) => (
+                  <div
+                    key={plan.id}
+                    className={`relative rounded-3xl border p-7 flex flex-col justify-between gap-6 transition-all duration-200 ${
+                      plan.highlight
+                        ? "bg-gradient-to-b from-blue-950/30 to-neutral-900 border-blue-500/40 shadow-[0_0_40px_rgba(59,130,246,0.12)] scale-[1.02]"
+                        : "bg-neutral-900/70 border-white/10"
+                    }`}
+                  >
+                    {plan.highlight && (
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                        <span className="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
+                          Best Value
+                        </span>
+                      </div>
                     )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* ── Node Credit Cost Reference Table ─────────────────────────────────── */}
-          <div className="rounded-3xl border border-white/10 bg-neutral-900/70 p-6 sm:p-8 space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">Credit Deduction Rate</h3>
-              <p className="text-neutral-500 text-xs mt-1">
-                Exact credits deducted per node execution in your workflows.
-              </p>
-            </div>
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-white tracking-tight">{plan.name}</h3>
+                        <p className="text-neutral-500 text-xs mt-1">{plan.description}</p>
+                      </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {NODE_COSTS.map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-white/10 bg-neutral-950">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-white/5 border border-white/10">
-                      {item.icon}
+                      <div className="flex items-end gap-1.5">
+                        <span className="text-4xl font-bold text-white tracking-tight">{plan.price}</span>
+                        <span className="text-neutral-500 text-xs mb-1.5">{plan.period}</span>
+                      </div>
+
+                      <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-full">
+                        <Zap className="w-3.5 h-3.5" />
+                        {plan.credits}
+                      </div>
+
+                      <div className="h-[1px] bg-white/10 my-4" />
+
+                      <ul className="space-y-2.5 text-xs">
+                        {plan.features?.map((f: string, i: number) => (
+                          <li key={i} className="flex items-center gap-2 text-neutral-300">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <span className="text-xs font-medium text-white">{item.node}</span>
+
+                    <div className="pt-4">
+                      {plan.id === "free" ? (
+                        <button
+                          disabled
+                          className="w-full py-3 rounded-full bg-white/5 border border-white/10 text-neutral-400 text-xs font-semibold cursor-default"
+                        >
+                          {plan.cta}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handlePayment(plan.id)}
+                          disabled={purchasingPlan !== null}
+                          className={`w-full py-3 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-95 ${
+                            plan.highlight
+                              ? "bg-blue-600 hover:bg-blue-500 text-white"
+                              : "bg-white hover:bg-neutral-200 text-black"
+                          }`}
+                        >
+                          {purchasingPlan === plan.id ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Initializing Razorpay...</span>
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="w-4 h-4" />
+                              <span>{plan.cta}</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-xs font-mono font-semibold text-neutral-400">{item.cost}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>

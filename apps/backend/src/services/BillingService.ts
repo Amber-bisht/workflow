@@ -116,29 +116,36 @@ export class BillingService {
   }
 
   /**
-   * Add 1000 paid credits after Razorpay Starter Pack payment.
+   * Add paid credits after Razorpay payment verification (1000 for Starter, 5000 for Pro).
    */
-  static async addStarterCredits(userId: string, razorpayOrderId: string) {
+  static async addPaidCredits(userId: string, amount: number, razorpayOrderId: string, planName: string = "STARTER") {
     await prisma.userCredits.upsert({
       where: { userId },
       create: {
         userId,
         freeCredits: 100,
-        paidCredits: 1000,
+        paidCredits: amount,
         cycleStartDate: new Date(),
       },
       update: {
-        paidCredits: { increment: 1000 },
+        paidCredits: { increment: amount },
       },
     });
 
     await prisma.creditTransaction.create({
       data: {
         userId,
-        amount: 1000,
-        reason: "STARTER_TOPUP",
+        amount,
+        reason: `${planName}_TOPUP`,
         razorpayOrderId,
       },
     });
+  }
+
+  /**
+   * Legacy wrapper for 1000 starter credits.
+   */
+  static async addStarterCredits(userId: string, razorpayOrderId: string) {
+    return this.addPaidCredits(userId, 1000, razorpayOrderId, "STARTER");
   }
 }
