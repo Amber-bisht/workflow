@@ -108,17 +108,7 @@ export default function NodeInspectorDrawer() {
   };
 
   useEffect(() => {
-    // Fetch credentials
-    fetch("/api/credentials?userId=default_user")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.credentials)) {
-          setSavedCredentials(data.credentials);
-        }
-      })
-      .catch(() => {});
-
-    // Fetch secrets
+    // Fetch secrets from Workflow Vault
     if (workflowId) {
       fetch(`/api/workflow/${workflowId}/secrets`)
         .then((res) => res.json())

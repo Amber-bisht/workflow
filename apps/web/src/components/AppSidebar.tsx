@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 interface AppSidebarProps {
-  activePath: "workflows" | "nodes" | "profile" | "billing" | "credentials";
+  activePath: "workflows" | "nodes" | "profile" | "billing";
   onNewWorkflow?: () => void;
 }
 
@@ -102,8 +102,8 @@ export default function AppSidebar({ activePath, onNewWorkflow }: AppSidebarProp
           <Link
             href="/dashboard"
             className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs font-semibold w-full cursor-pointer ${activePath === "workflows"
-                ? "bg-white/10 text-white border border-white/15"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              ? "bg-white/10 text-white border border-white/15"
+              : "text-neutral-400 hover:text-white hover:bg-white/5"
               } ${isCollapsed ? "justify-center px-0" : ""}`}
           >
             <Workflow className={`w-4 h-4 shrink-0 ${activePath === "workflows" ? "text-blue-400" : "text-neutral-500"}`} />
@@ -114,8 +114,8 @@ export default function AppSidebar({ activePath, onNewWorkflow }: AppSidebarProp
           <Link
             href="/nodes"
             className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs font-semibold w-full cursor-pointer ${activePath === "nodes"
-                ? "bg-white/10 text-white border border-white/15"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              ? "bg-white/10 text-white border border-white/15"
+              : "text-neutral-400 hover:text-white hover:bg-white/5"
               } ${isCollapsed ? "justify-center px-0" : ""}`}
           >
             <Layers className={`w-4 h-4 shrink-0 ${activePath === "nodes" ? "text-purple-400" : "text-neutral-500"}`} />
@@ -126,8 +126,8 @@ export default function AppSidebar({ activePath, onNewWorkflow }: AppSidebarProp
           <Link
             href="/profile"
             className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs font-semibold w-full cursor-pointer ${activePath === "profile"
-                ? "bg-white/10 text-white border border-white/15"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              ? "bg-white/10 text-white border border-white/15"
+              : "text-neutral-400 hover:text-white hover:bg-white/5"
               } ${isCollapsed ? "justify-center px-0" : ""}`}
           >
             <User className={`w-4 h-4 shrink-0 ${activePath === "profile" ? "text-blue-400" : "text-neutral-500"}`} />
@@ -138,24 +138,12 @@ export default function AppSidebar({ activePath, onNewWorkflow }: AppSidebarProp
           <Link
             href="/billing"
             className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs font-semibold w-full cursor-pointer ${activePath === "billing"
-                ? "bg-white/10 text-white border border-white/15"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+              ? "bg-white/10 text-white border border-white/15"
+              : "text-neutral-400 hover:text-white hover:bg-white/5"
               } ${isCollapsed ? "justify-center px-0" : ""}`}
           >
             <CreditCard className={`w-4 h-4 shrink-0 ${activePath === "billing" ? "text-emerald-400" : "text-neutral-500"}`} />
             {!isCollapsed && <span>Billing & Plans</span>}
-          </Link>
-
-          {/* Nav item: Credentials Vault */}
-          <Link
-            href="/credentials"
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs font-semibold w-full cursor-pointer ${activePath === "credentials"
-                ? "bg-white/10 text-white border border-white/15"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
-              } ${isCollapsed ? "justify-center px-0" : ""}`}
-          >
-            <Key className={`w-4 h-4 shrink-0 ${activePath === "credentials" ? "text-amber-400" : "text-neutral-500"}`} />
-            {!isCollapsed && <span>Credentials Vault</span>}
           </Link>
         </nav>
       </div>
