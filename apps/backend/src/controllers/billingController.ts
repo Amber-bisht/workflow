@@ -119,12 +119,17 @@ billingRouter.post("/create-order", async (c) => {
       notes: { userId, plan: planName, credits },
     });
 
+    const cleanKeyId = (process.env.RAZORPAY_KEY_ID || env.RAZORPAY_KEY_ID || "")
+      .replace(/^["']|["']$/g, "")
+      .replace(/%22/gi, "")
+      .trim();
+
     return c.json({
       success: true,
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID || env.RAZORPAY_KEY_ID,
+      keyId: cleanKeyId,
       credits,
     });
   } catch (err: any) {

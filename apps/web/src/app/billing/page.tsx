@@ -123,8 +123,10 @@ export default function BillingPage() {
       }
 
       // Configure Razorpay Options
+      const cleanKey = (orderData.keyId || "").replace(/^["']|["']$/g, "").replace(/%22/gi, "").trim();
+
       const options = {
-        key: orderData.keyId,
+        key: cleanKey,
         amount: orderData.amount,
         currency: orderData.currency,
         name: "automation.amberbisht.me",
