@@ -16,6 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "automation.amberbisht.me - Multimodal Workflow Canvas",
   description: "Visual LLM and image processing workflow builder by Amber Bisht",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

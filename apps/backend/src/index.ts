@@ -72,6 +72,11 @@ app.route("/api/workflow", workflowSecretsRouter);
 app.route("/api/billing", billingRouter);
 app.route("/api/credentials", credentialsRouter);
 
+// 404 NotFound Handler: redirect unknown requests to production frontend
+app.notFound((c) => {
+  return c.redirect("https://automation.amberbisht.me", 302);
+});
+
 console.log(`🚀 automation.amberbisht.me Backend running at http://localhost:${env.PORT}`);
 
 export default {
