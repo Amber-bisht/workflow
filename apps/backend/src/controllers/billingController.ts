@@ -17,7 +17,14 @@ function getRazorpay() {
     .replace(/%22$/gi, "")
     .trim();
 
-  if (!keyId || !keySecret) throw new Error("Razorpay credentials (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET) not configured in .env");
+  if (!keyId || !keySecret) {
+    const missing: string[] = [];
+    if (!keyId) missing.push("RAZORPAY_KEY_ID");
+    if (!keySecret) missing.push("RAZORPAY_KEY_SECRET");
+    console.error(`[Billing API] Razorpay Error: Missing required key(s): ${missing.join(", ")}`);
+    throw new Error(`Razorpay credentials missing: ${missing.join(", ")}. Please set them in your .env or server environment.`);
+  }
+
   return new Razorpay({ key_id: keyId, key_secret: keySecret });
 }
 

@@ -1,11 +1,31 @@
 import { z } from "zod";
-import dotenv from "dotenv";
+import fs from "fs";
 import path from "path";
 
-// Load root and local .env files into process.env
-dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
-dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+// Parse root .env into process.env when running from subdirectories
+const envPaths = [
+  path.resolve(process.cwd(), "../../.env"),
+  path.resolve(process.cwd(), "../.env"),
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(__dirname, "../../../.env"),
+  path.resolve(__dirname, "../../.env"),
+];
+for (const envPath of envPaths) {
+  if (fs.existsSync(envPath)) {
+    const content = fs.readFileSync(envPath, "utf8");
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith("#") && trimmed.includes("=")) {
+        const idx = trimmed.indexOf("=");
+        const key = trimmed.slice(0, idx).trim();
+        const val = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, "");
+        if (key) {
+          process.env[key] = val;
+        }
+      }
+    }
+  }
+}
 
 const envSchema = z.object({
   PORT: z.string().default("4000"),
