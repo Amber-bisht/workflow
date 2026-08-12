@@ -1,8 +1,16 @@
 import fs from "fs";
 import path from "path";
+import dns from "dns";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
+
+// Prefer IPv4 DNS resolution for AWS EC2 instances without IPv6 egress
+if (dns.setDefaultResultOrder) {
+  try {
+    dns.setDefaultResultOrder("ipv4first");
+  } catch {}
+}
 
 // Helper to parse root .env into process.env if DATABASE_URL is missing
 if (!process.env.DATABASE_URL) {
@@ -49,6 +57,9 @@ const isRemote =
 const pool = new pg.Pool({
   connectionString,
   ssl: isRemote ? { rejectUnauthorized: false } : undefined,
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  max: 10,
 });
 
 const adapter = new PrismaPg(pool);
