@@ -38,10 +38,24 @@ if (!process.env.DATABASE_URL) {
   }
 }
 
-const connectionString = (
+let connectionString = (
   process.env.DATABASE_URL ||
   "postgresql://postgres:postgres@localhost:5432/nextflow?schema=public"
 ).replace(/^["']|["']$/g, "").replace(/%22$/gi, "").trim();
+
+// Auto-convert IPv6 direct Supabase URLs (db.xxx.supabase.co:5432) to IPv4 Pooler URLs for AWS EC2 / Vercel
+if (connectionString.includes(".supabase.co:5432")) {
+  const refMatch = connectionString.match(/db\.([a-z0-9]+)\.supabase\.co:5432/i);
+  if (refMatch) {
+    const projectRef = refMatch[1];
+    connectionString = connectionString
+      .replace(`db.${projectRef}.supabase.co:5432`, `aws-0-ap-northeast-1.pooler.supabase.com:6543`)
+      .replace("postgresql://postgres:", `postgresql://postgres.${projectRef}:`);
+    if (!connectionString.includes("pgbouncer=true")) {
+      connectionString += connectionString.includes("?") ? "&pgbouncer=true" : "?pgbouncer=true";
+    }
+  }
+}
 
 if (connectionString) {
   process.env.DATABASE_URL = connectionString;
