@@ -144,13 +144,17 @@ billingRouter.post("/verify-payment", async (c) => {
 
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, planId } = await c.req.json();
-    const keySecret = process.env.RAZORPAY_KEY_SECRET || env.RAZORPAY_KEY_SECRET;
+    const keySecret = (process.env.RAZORPAY_KEY_SECRET || env.RAZORPAY_KEY_SECRET || "")
+      .replace(/^["']|["']$/g, "")
+      .replace(/%22/gi, "")
+      .trim();
 
     const expectedSignature = createHmac("sha256", keySecret)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
+      console.error(`[Billing Verification Failed] Order: ${razorpay_order_id} | Expected: ${expectedSignature} | Received: ${razorpay_signature}`);
       return c.json({ error: "Invalid payment signature" }, 400);
     }
 

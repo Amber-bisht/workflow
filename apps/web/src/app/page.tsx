@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import {
   CheckCircle2,
@@ -130,9 +131,12 @@ export default function KreaExactLandingPage() {
           }}
         >
           {/* Hero Image */}
-          <img
+          <Image
             src="/hero.png"
             alt="automation.amberbisht.me AI Workflow Canvas"
+            fill
+            priority
+            sizes="100vw"
             className="absolute inset-0 z-0 w-full h-full object-cover [object-position:center_70%] pointer-events-none select-none"
           />
 
@@ -224,9 +228,11 @@ export default function KreaExactLandingPage() {
               >
                 {/* Image — full width, no rounding */}
                 <div className="w-full overflow-hidden">
-                  <img
+                  <Image
                     src={card.image}
                     alt={card.title}
+                    width={800}
+                    height={600}
                     className="w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                 </div>
@@ -310,9 +316,11 @@ export default function KreaExactLandingPage() {
           </div>
 
           <div className="bg-black">
-            <img
+            <Image
               src="/example.png"
               alt="Visual workflow node canvas"
+              width={1200}
+              height={800}
               className="w-full object-contain"
             />
           </div>
@@ -321,9 +329,11 @@ export default function KreaExactLandingPage() {
         {/* Feature 2: Every frontier model */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="bg-black order-2 lg:order-1">
-            <img
+            <Image
               src="/apirouter.png"
               alt="Multi-model AI router"
+              width={1200}
+              height={800}
               className="w-full object-contain"
             />
           </div>
@@ -368,9 +378,11 @@ export default function KreaExactLandingPage() {
           </div>
 
           <div className="bg-black">
-            <img
+            <Image
               src="/indian.png"
               alt="Website monitoring dashboard"
+              width={1200}
+              height={800}
               className="w-full object-contain"
             />
           </div>

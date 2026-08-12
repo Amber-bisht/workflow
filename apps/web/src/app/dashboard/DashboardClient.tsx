@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Plus,
   Edit3,
@@ -280,9 +281,12 @@ export default function DashboardClient({ initialWorkflows }: DashboardClientPro
 
           {/* Feature Banner Image */}
           <div className="w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-neutral-900/50 h-44 sm:h-56 md:h-64 relative">
-            <img
+            <Image
               src="/lets.png"
               alt="Workflow Canvas Overview"
+              fill
+              priority
+              sizes="(max-width: 1200px) 100vw, 1200px"
               className="w-full h-full object-cover object-center"
             />
           </div>

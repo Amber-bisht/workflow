@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Plus,
@@ -166,7 +167,7 @@ export default function AppSidebar({ activePath, onNewWorkflow }: AppSidebarProp
           >
             <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
               {user?.image ? (
-                <img src={user.image} alt="User Avatar" className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/10" />
+                <Image src={user.image} alt="User Avatar" width={32} height={32} className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/10" />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shrink-0 border border-white/10">
                   {user?.name?.charAt(0) || "U"}

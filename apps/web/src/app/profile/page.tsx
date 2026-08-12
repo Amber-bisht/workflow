@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Shield,
@@ -51,7 +52,7 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
               <div className="flex items-center gap-4">
                 {user?.image ? (
-                  <img src={user.image} alt="User Avatar" className="w-16 h-16 rounded-2xl object-cover border border-white/10 shadow-md shrink-0" />
+                  <Image src={user.image} alt="User Avatar" width={64} height={64} className="w-16 h-16 rounded-2xl object-cover border border-white/10 shadow-md shrink-0" />
                 ) : (
                   <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-bold text-2xl border border-white/10 shadow-md shrink-0 select-none">
                     {user?.name?.charAt(0) || "U"}

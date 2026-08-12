@@ -8,6 +8,13 @@ dotenv.config({ path: path.resolve(process.cwd(), "../../.env.local") });
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const nextConfig: NextConfig = {
+  images: {
+    minimumCacheTTL: 31536000,
+    remotePatterns: [
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "**" },
+    ],
+  },
   async rewrites() {
     const defaultUrl =
       process.env.NODE_ENV === "production"
