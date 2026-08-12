@@ -5,12 +5,14 @@ export class ResendService {
    * Send an email via Resend API
    */
   static async sendEmail(
-    apiKey: string,
-    from: string,
+    rawApiKey: string,
+    rawFrom: string,
     to: string,
     subject: string,
     body: string
   ): Promise<{ id: string; success: boolean }> {
+    const apiKey = (rawApiKey || "").replace(/^["']|["']$/g, "").replace(/%22$/gi, "").trim();
+    const from = (rawFrom || "").replace(/^["']|["']$/g, "").replace(/%22$/gi, "").trim();
     const resend = new Resend(apiKey);
 
     const { data, error } = await resend.emails.send({

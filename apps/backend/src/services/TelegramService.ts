@@ -3,11 +3,12 @@ export class TelegramService {
    * Send a text message via Telegram Bot API
    */
   static async sendMessage(
-    botToken: string,
-    chatId: string,
+    rawBotToken: string,
+    rawChatId: string,
     text: string
   ): Promise<{ ok: boolean; message_id: number }> {
-    const rawId = chatId.trim();
+    const botToken = (rawBotToken || "").replace(/^["']|["']$/g, "").replace(/%22$/gi, "").trim();
+    const rawId = (rawChatId || "").replace(/^["']|["']$/g, "").replace(/%22$/gi, "").trim();
     const candidateIds = [rawId];
     if (!rawId.startsWith("-") && !rawId.startsWith("@")) {
       candidateIds.push(`-100${rawId}`);

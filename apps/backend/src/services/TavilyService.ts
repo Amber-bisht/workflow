@@ -16,11 +16,13 @@ export class TavilyService {
    * Perform AI-powered web search/research via Tavily API
    */
   static async search(
-    apiKey: string,
+    rawApiKey: string,
     query: string,
     maxResults: number = 5,
     searchDepth: "basic" | "advanced" = "basic"
   ): Promise<TavilySearchResponse> {
+    const apiKey = (rawApiKey || "").replace(/^["']|["']$/g, "").replace(/%22$/gi, "").trim();
+
     const response = await fetch("https://api.tavily.com/search", {
       method: "POST",
       headers: {

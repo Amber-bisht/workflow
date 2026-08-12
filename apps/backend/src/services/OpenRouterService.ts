@@ -13,7 +13,10 @@ export class OpenRouterService {
    * Execute OpenRouter API for multimodal (text + vision) inference
    */
   static async generateContent(payload: OpenRouterPayload): Promise<string> {
-    const apiKey = process.env.OPENROUTER_API_KEY || env.OPENROUTER_API_KEY;
+    const apiKey = (process.env.OPENROUTER_API_KEY || env.OPENROUTER_API_KEY || "")
+      .replace(/^["']|["']$/g, "")
+      .replace(/%22$/gi, "")
+      .trim();
 
     if (!apiKey) {
       throw new Error(
