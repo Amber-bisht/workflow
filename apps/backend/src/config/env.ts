@@ -1,4 +1,11 @@
 import { z } from "zod";
+import dotenv from "dotenv";
+import path from "path";
+
+// Load root and local .env files into process.env
+dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const envSchema = z.object({
   PORT: z.string().default("4000"),

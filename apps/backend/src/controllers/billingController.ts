@@ -7,9 +7,17 @@ import { env } from "../config/env";
 export const billingRouter = new Hono();
 
 function getRazorpay() {
-  const keyId = process.env.RAZORPAY_KEY_ID || env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET || env.RAZORPAY_KEY_SECRET;
-  if (!keyId || !keySecret) throw new Error("Razorpay credentials not configured in .env");
+  const keyId = (process.env.RAZORPAY_KEY_ID || env.RAZORPAY_KEY_ID || "")
+    .replace(/^["']|["']$/g, "")
+    .replace(/%22$/gi, "")
+    .trim();
+
+  const keySecret = (process.env.RAZORPAY_KEY_SECRET || env.RAZORPAY_KEY_SECRET || "")
+    .replace(/^["']|["']$/g, "")
+    .replace(/%22$/gi, "")
+    .trim();
+
+  if (!keyId || !keySecret) throw new Error("Razorpay credentials (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET) not configured in .env");
   return new Razorpay({ key_id: keyId, key_secret: keySecret });
 }
 
