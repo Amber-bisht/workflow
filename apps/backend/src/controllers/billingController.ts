@@ -15,8 +15,7 @@ function getRazorpay() {
 
 // GET /api/billing/status
 billingRouter.get("/status", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "Unauthorized" }, 401);
+  const userId = c.req.header("x-user-id") || "default_user";
 
   const credits = await BillingService.getCredits(userId);
   return c.json({ success: true, ...credits });
@@ -81,8 +80,7 @@ billingRouter.get("/plans", (c) => {
 
 // POST /api/billing/create-order — create Razorpay order for Starter (₹99) or Pro (₹499)
 billingRouter.post("/create-order", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "Unauthorized" }, 401);
+  const userId = c.req.header("x-user-id") || "default_user";
 
   try {
     const body = await c.req.json().catch(() => ({}));
